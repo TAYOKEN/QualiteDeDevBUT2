@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tableau de bord</title>
+    <link rel="stylesheet" href="css/dashboard.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <img src="logo.png" alt="logo">
+        </div>
+        <nav>
+            <a href="#">Déconnecter</a>
+            <a href="#">à propos</a>
+            <div class="menu">☰</div>
+        </nav>
+    </header>
+
+    <main>
+        <section class="infos">
+            <div class="client-card">
+                <p><strong>Mr. Boukayouh Yanis</strong><br>Client</p>
+            </div>
+
+            <div class="solde-card">
+                <p>Solde Global :</p>
+                <h1 class="solde">+15 500$</h1>
+            </div>
+
+            <div class="chart-card">
+                <canvas id="graphique"></canvas>
+            </div>
+        </section>
+
+        <section class="transactions">
+            <table id="table-transactions">
+                <thead>
+                    <tr>
+                        <th data-type="date">Date <span class="arrow">↓</span></th>
+                        <th data-type="text">Intitulé <span class="arrow">↓</span></th>
+                        <th data-type="text">N° Siret <span class="arrow">↓</span></th>
+                        <th data-type="number">Montant <span class="arrow">↓</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>05/10/25</td><td>Achat de stock de chaussures Nike</td><td>784 671 695 00103</td><td class="negatif">-1000$</td></tr>
+                    <tr><td>05/10/25</td><td>Achat de T-shirt blanc</td><td>784 671 678 04403</td><td class="negatif">-1500$</td></tr>
+                    <tr><td>05/10/25</td><td>Achat de Polo</td><td>784 671 695 00103</td><td class="negatif">-2000$</td></tr>
+                    <tr><td>15/09/25</td><td>Vente de stock de T-shirt</td><td>784 671 695 08423</td><td class="positif">+10000$</td></tr>
+                    <tr><td>09/09/25</td><td>Achat de stock de fumo Cirno</td><td>784 671 695 00103</td><td class="negatif">-2000$</td></tr>
+                    <tr><td>20/08/25</td><td>Vente de baskets Adidas</td><td>784 671 645 09876</td><td class="positif">+3000$</td></tr>
+                    <tr><td>10/08/25</td><td>Achat de jeans Levi’s</td><td>784 671 610 77890</td><td class="negatif">-2500$</td></tr>
+                    <tr><td>01/07/25</td><td>Vente de chemises</td><td>784 671 600 11223</td><td class="positif">+4000$</td></tr>
+                    <tr><td>15/06/25</td><td>Achat de pulls H&M</td><td>784 671 622 44556</td><td class="negatif">-1800$</td></tr>
+                    <tr><td>05/05/25</td><td>Vente de manteaux Zara</td><td>784 671 677 77889</td><td class="positif">+6000$</td></tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <script>
+        // --- CHART.JS ---
+        const ctx = document.getElementById('graphique').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['26/08/25', '05/09/25', '15/09/25', '05/10/25'],
+                datasets: [{
+                    label: 'Profit',
+                    data: [1000, 5000, 5500, 15500],
+                    borderColor: 'green',
+                    backgroundColor: 'transparent',
+                    tension: 0.2
+                }]
+            },
+            options: {
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { title: { text: 'Date', display: true } },
+                    y: { title: { text: 'Montant ($)', display: true } }
+                }
+            }
+        });
+
+        // --- TRI DU TABLEAU ---
+        const table = document.getElementById('table-transactions');
+        const headers = table.querySelectorAll('th');
+
+        headers.forEach(header => {
+            header.addEventListener('click', () => {
+                const type = header.dataset.type;
+                const index = Array.from(headers).indexOf(header);
+                const arrow = header.querySelector('.arrow');
+                const ascending = arrow.textContent === '↓';
+
+                sortTable(index, type, ascending);
+                arrow.textContent = ascending ? '↑' : '↓';
+            });
+        });
+
+        function sortTable(index, type, ascending) {
+            const tbody = table.querySelector('tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+
+            rows.sort((a, b) => {
+                const aText = a.children[index].textContent.trim();
+                const bText = b.children[index].textContent.trim();
+
+                if (type === 'number') {
+                    const aNum = parseFloat(aText.replace(/[^0-9.-]/g, ''));
+                    const bNum = parseFloat(bText.replace(/[^0-9.-]/g, ''));
+                    return ascending ? aNum - bNum : bNum - aNum;
+                } else if (type === 'date') {
+                    const [da, ma, ya] = aText.split('/').map(Number);
+                    const [db, mb, yb] = bText.split('/').map(Number);
+                    const dateA = new Date(2000 + ya, ma - 1, da);
+                    const dateB = new Date(2000 + yb, mb - 1, db);
+                    return ascending ? dateA - dateB : dateB - dateA;
+                } else {
+                    return ascending ? aText.localeCompare(bText) : bText.localeCompare(aText);
+                }
+            });
+
+            tbody.innerHTML = '';
+            rows.forEach(row => tbody.appendChild(row));
+        }
+    </script>
+</body>
+</html>

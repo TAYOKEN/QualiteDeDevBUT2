@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inscription</title>
+    <link rel="stylesheet" href="css/register.css">
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <img src="logo.png" alt="logo">
+        </div>
+        <nav>
+            <a href="#">à propos</a>
+            <a href="login.html">Se connecter</a>
+        </nav>
+    </header>
+
+    <main>
+        <div class="image-container">
+            <img src="https://umaevents.io/_image/owner/full/458d54584eb4fa59c6520a6d299243f2c5c0d3b0.jpg" alt="ville">
+        </div>
+
+        <div class="form-container">
+            <h1>Bienvenue</h1>
+            <form>
+                <label for="identifiant">Identifiant :</label>
+                <input type="text" id="identifiant" name="identifiant" required>
+
+                <label for="email">Email :</label>
+                <input type="email" id="email" name="email" required>
+
+                <label for="confirm-email">Confirmer Email :</label>
+                <input type="email" id="confirm-email" name="confirm-email" required>
+
+                <label for="password">Mot de passe :</label>
+                <input type="password" id="password" name="password" required>
+
+                <label for="confirm-password">Confirmer mot de passe :</label>
+                <input type="password" id="confirm-password" name="confirm-password" required>
+
+                <div class="conditions">
+                    <input type="checkbox" id="conditions" required>
+                    <label for="conditions">J'accepte les conditions d'utilisation</label>
+                </div>
+
+                <button type="submit">S'inscrire</button>
+            </form>
+        </div>
+    </main>
+</body>
+</html>
