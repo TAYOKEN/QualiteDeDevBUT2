@@ -15,25 +15,9 @@
     <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
     <style>
-        /* Styles minimaux pour demo - adapte ton css/dashboard.css si nécessaire */
         :root{--bg:#f5f7fb;--card:#fff;--accent:#1f8a70;--danger:#d9534f;}
-    body {
-        font-family: 'Poppins', sans-serif;
-        background: linear-gradient(90deg, #ffffff, #ffffff);
-        color: #222;
-        margin: 0;
-        padding: 0;
-        }
-
-        header {
-            background: linear-gradient(90deg, #b46ff1, #ff4ca8);
-            color: white;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 25px;
-        }
-
+        body {font-family: 'Poppins', sans-serif; background: linear-gradient(90deg, #ffffff, #ffffff); color: #222; margin: 0; padding: 0;}
+        header {background: linear-gradient(90deg, #b46ff1, #ff4ca8); color: white; display: flex; justify-content: space-between; align-items: center; padding: 10px 25px;}
         header .logo img{height:36px;}
         nav a{margin-right:16px;text-decoration:none;color:#333}
         main{padding:20px;max-width:1200px;margin:18px auto;}
@@ -43,26 +27,9 @@
         .solde-card .solde{margin:6px 0;font-size:28px;}
         .controls{display:flex;gap:8px;align-items:center;margin-bottom:8px}
         .transactions{background:var(--card);padding:12px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.04)}
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            }        
-            th, td {
-            padding: 12px 16px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-            }
-
-            th {
-                 background: #f4f2f9;
-                  color: #444;
-                     font-weight: 600;
-                 cursor: pointer;
-                }
+        table {width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);}        
+        th, td {padding: 12px 16px; text-align: left; border-bottom: 1px solid #ddd;}
+        th {background: #f4f2f9; color: #444; font-weight: 600; cursor: pointer;}
         th .arrow{margin-left:6px}
         tr.detail-row{display:none;background:#fbfbfb}
         .row-toggle{cursor:pointer}
@@ -97,7 +64,7 @@
     <main>
         <section class="infos">
             <div class="client-card">
-                <p><strong>Mr. Boukayouh Yanis</strong><br>Client</p>
+                <p><strong>Mr. Boukayouh Yanis</strong><br>PO</p>
                 <p class="small">Portail de gestion de paiement - démonstration</p>
             </div>
 
@@ -109,9 +76,7 @@
 
             <div class="chart-card">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-                    <div>
-                        <strong>Évolution de la trésorerie</strong>
-                    </div>
+                    <div><strong>Évolution de la trésorerie</strong></div>
                     <div style="display:flex;gap:8px;align-items:center">
                         <label class="small">Type :</label>
                         <select id="chartTypeSelect" class="btn">
@@ -150,48 +115,73 @@
                 <div class="result-count" id="total-remises"></div>
             </div>
 
-            <table id="table-transactions" aria-describedby="result-count">
+            <table id="table-clients" aria-describedby="result-count">
                 <thead>
                     <tr>
-                        <th data-type="date">Date <span class="arrow">↓</span></th>
-                        <th data-type="text">Intitulé <span class="arrow">↓</span></th>
-                        <th data-type="text">N° Siret <span class="arrow">↓</span></th>
-                        <th data-type="number">Montant <span class="arrow">↓</span></th>
-                        <th> </th>
+                        <th data-type="text">Identifiant : <span class="arrow">↓</span></th>
+                        <th data-type="text">Nom : <span class="arrow">↓</span></th>
+                        <th data-type="text">N° Siret : <span class="arrow">↓</span></th>
+                        <th data-type="number">Impayés : <span class="arrow">↓</span></th>
+                        <th>Accéder compte :</th>
+                        <th>Voir plus :</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- Chaque ligne principale est suivie d'une ligne detail-row (cachée) pour les détails -->
-                    <tr class="data-row"><td>05/10/25</td><td>Achat de stock de chaussures Nike</td><td>784 671 695 00103</td><td class="negatif">-1000$</td><td class="row-toggle">➕</td></tr>
-                    <tr class="detail-row"><td colspan="5">Fournisseur: Nike France — Mode de paiement: Carte — Référence remise: REM-001 — Remarques: livraison OK</td></tr>
+                    <tr class="data-row">
+                        <td>US9652125</td>
+                        <td>Yehven Kefa</td>
+                        <td>784 671 695 00103</td>
+                        <td class="negatif">-1000 $</td>
+                        <td><button class="btn-acceder">⚙️ Accéder</button></td>
+                        <td><button class="btn-voir">👁️ Voir Plus</button></td>
+                    </tr>
 
-                    <tr class="data-row"><td>05/10/25</td><td>Achat de T-shirt blanc</td><td>784 671 678 04403</td><td class="negatif">-1500$</td><td class="row-toggle">➕</td></tr>
-                    <tr class="detail-row"><td colspan="5">Fournisseur: Atelier Textile — Mode: Carte — Référence: REM-002</td></tr>
+                    <tr class="data-row">
+                        <td>US9652124</td>
+                        <td>Thomas Noël</td>
+                        <td>784 671 678 04403</td>
+                        <td class="negatif">-1500 $</td>
+                        <td><button class="btn-acceder">⚙️ Accéder</button></td>
+                        <td><button class="btn-voir">👁️ Voir Plus</button></td>
+                    </tr>
 
-                    <tr class="data-row"><td>05/10/25</td><td>Achat de Polo</td><td>784 671 695 00103</td><td class="negatif">-2000$</td><td class="row-toggle">➕</td></tr>
-                    <tr class="detail-row"><td colspan="5">Détails: Polo coupe classique, fournisseur: PoloCo</td></tr>
+                    <tr class="data-row">
+                        <td>US9652123</td>
+                        <td>Yanis Boukayouh</td>
+                        <td>784 671 695 00103</td>
+                        <td class="negatif">-2000 $</td>
+                        <td><button class="btn-acceder">⚙️ Accéder</button></td>
+                        <td><button class="btn-voir">👁️ Voir Plus</button></td>
+                    </tr>
 
-                    <tr class="data-row"><td>15/09/25</td><td>Vente de stock de T-shirt</td><td>784 671 695 08423</td><td class="positif">+10000$</td><td class="row-toggle">➕</td></tr>
-                    <tr class="detail-row"><td colspan="5">Client: Vente en gros — Référence: REM-010</td></tr>
+                    <tr class="data-row">
+                        <td>US9652122</td>
+                        <td>Rayan Essaidi</td>
+                        <td>784 671 695 08423</td>
+                        <td class="positif">0</td>
+                        <td><button class="btn-acceder">⚙️ Accéder</button></td>
+                        <td><button class="btn-voir">👁️ Voir Plus</button></td>
+                    </tr>
 
-                    <tr class="data-row"><td>09/09/25</td><td>Achat de stock de fumo Cirno</td><td>784 671 695 00103</td><td class="negatif">-2000$</td><td class="row-toggle">➕</td></tr>
-                    <tr class="detail-row"><td colspan="5">Produit: Fumo Cirno — Quantité: 50 — Référence: REM-011</td></tr>
+                    <tr class="data-row">
+                        <td>US9652121</td>
+                        <td>Hamza Revel</td>
+                        <td>784 671 695 00103</td>
+                        <td class="negatif">-2000 $</td>
+                        <td><button class="btn-acceder">⚙️ Accéder</button></td>
+                        <td><button class="btn-voir">👁️ Voir Plus</button></td>
+                    </tr>
 
-                    <tr class="data-row"><td>20/08/25</td><td>Vente de baskets Adidas</td><td>784 671 645 09876</td><td class="positif">+3000$</td><td class="row-toggle">➕</td></tr>
-                    <tr class="detail-row"><td colspan="5">Vente magasin — Référence: REM-020</td></tr>
-
-                    <tr class="data-row"><td>10/08/25</td><td>Achat de jeans Levi’s</td><td>784 671 610 77890</td><td class="negatif">-2500$</td><td class="row-toggle">➕</td></tr>
-                    <tr class="detail-row"><td colspan="5">Fournisseur: Levi's — Réf: REM-030</td></tr>
-
-                    <tr class="data-row"><td>01/07/25</td><td>Vente de chemises</td><td>784 671 600 11223</td><td class="positif">+4000$</td><td class="row-toggle">➕</td></tr>
-                    <tr class="detail-row"><td colspan="5">Vente marché — Réf: REM-040</td></tr>
-
-                    <tr class="data-row"><td>15/06/25</td><td>Achat de pulls H&M</td><td>784 671 622 44556</td><td class="negatif">-1800$</td><td class="row-toggle">➕</td></tr>
-                    <tr class="detail-row"><td colspan="5">Fournisseur: H&M — Réf: REM-050</td></tr>
-
-                    <tr class="data-row"><td>05/05/25</td><td>Vente de manteaux Zara</td><td>784 671 677 77889</td><td class="positif">+6000$</td><td class="row-toggle">➕</td></tr>
-                    <tr class="detail-row"><td colspan="5">Grossiste: Zara France — Réf: REM-060</td></tr>
+                    <tr class="data-row">
+                        <td>US9652120</td>
+                        <td>John Pork</td>
+                        <td>784 671 695 00104</td>
+                        <td class="positif">0</td>
+                        <td><button class="btn-acceder">⚙️ Accéder</button></td>
+                        <td><button class="btn-voir">👁️ Voir Plus</button></td>
+                    </tr>
                 </tbody>
+
                 <tfoot>
                     <tr>
                         <td colspan="5" class="totals">Total (visible) : <span id="visible-total">0 $</span></td>
@@ -208,10 +198,8 @@
             </div>
         </section>
     </main>
-
     <script>
-    // ---------- UTIL / state ----------
-    const table = document.getElementById('table-transactions');
+const table = document.getElementById('table-clients');
     const tbody = table.querySelector('tbody');
     const headers = table.querySelectorAll('th[data-type]');
     const perPageSelect = document.getElementById('perPage');
@@ -227,9 +215,9 @@
 
     // parse un montant (ex: "+1 000$" ou "-1000$")
     function parseAmount(text){
-        // supprime espaces et $ et +, mais conserver signe
         if(!text) return 0;
-        const num = parseFloat(text.replace(/\s/g,'').replace('€','').replace('$','').replace('+',''));
+        const cleaned = text.replace(/\s/g,'').replace('€','').replace('$','');
+        const num = parseFloat(cleaned.replace('+','').replace('-','')) || 0;
         return text.includes('-') ? -Math.abs(num) : Math.abs(num);
     }
 
@@ -259,14 +247,17 @@
         });
     }
 
-    // colorisation par tranche (Epic 3 US4)
+    // colorisation par tranche (tranche = 100). On utilise 3 classes
+    // bucket = floor(abs(montant)/100)
+    // logique: bucket 0-1 => band1, 2-9 => band2, >=10 => band3 (pour lisibilité)
     function applyColorBands(){
         rowsData.forEach(item => {
             item.rowEl.classList.remove('color-band-1','color-band-2','color-band-3');
             const absM = Math.abs(item.montant);
-            if(absM < 1000) item.rowEl.classList.add('color-band-1');
-            else if(absM < 3000) item.rowEl.classList.add('color-band-2');
-            else item.rowEl.classList.add('color-band-3');
+            const bucket = Math.floor(absM / 100);
+            if(bucket <= 1) item.rowEl.classList.add('color-band-1');        // < 200$
+            else if(bucket <= 9) item.rowEl.classList.add('color-band-2');   // 200 - 999$
+            else item.rowEl.classList.add('color-band-3');                   // >= 1000$
         });
     }
 
@@ -280,7 +271,11 @@
             if(rowsData[i].montant < 0) totalNeg += rowsData[i].montant;
         });
         visibleTotalEl.textContent = (total >= 0 ? '+' : '') + total.toLocaleString() + '$';
-        if(total < 0) visibleTotalEl.classList.add('negatif'); else visibleTotalEl.classList.remove('negatif');
+        if(total < 0) {
+            visibleTotalEl.classList.add('negatif');
+        } else {
+            visibleTotalEl.classList.remove('negatif');
+        }
 
         if(totalNeg < 0){
             totalNegDisplay.textContent = `Total impayés (visible) : ${totalNeg.toLocaleString()} $`;
@@ -305,17 +300,13 @@
 
         // hide all rows first
         rowsData.forEach(item => {
-            item.rowEl.style.display = 'table-row';
+            item.rowEl.style.display = 'none';
             if(item.detailEl) item.detailEl.style.display = 'none';
-            item.rowEl.classList.add('hidden-temp');
         });
 
-        // show only slice, hide others
+        // show only slice
         rowsData.forEach((item,i) => {
-            if(!slice.includes(i)){
-                item.rowEl.style.display = 'none';
-                if(item.detailEl) item.detailEl.style.display = 'none';
-            } else {
+            if(slice.includes(i)){
                 item.rowEl.style.display = 'table-row';
             }
         });
@@ -345,21 +336,22 @@
         });
         currentPage = 1;
         renderPage();
+        // quand le filtre change, on met à jour aussi le graphique secondaire (impayés)
+        updateChartDatasets();
     }
 
     // tri des lignes (index col, type, ascending)
     function sortRows(indexCol, type, ascending){
-        // indexCol corresponds to headers order: date=0,intitule=1,siret=2,montant=3
         const compare = (a,b) => {
             if(type === 'number') return ascending ? a.montant - b.montant : b.montant - a.montant;
             if(type === 'date') return ascending ? a.dateObj - b.dateObj : b.dateObj - a.dateObj;
-            // text
+            // text (indexCol 1 => intitulé, 2 => siret)
             const aa = (indexCol===1? a.intitule : a.siret).toLowerCase();
             const bb = (indexCol===1? b.intitule : b.siret).toLowerCase();
             return ascending ? aa.localeCompare(bb) : bb.localeCompare(aa);
         };
 
-        // sort rowsData but preserve original mapping; we'll sort filteredIndexList based on values to preserve all
+        // sort filteredIndexList by comparing underlying rowsData
         filteredIndexList.sort((i,j) => compare(rowsData[i], rowsData[j]));
         currentPage = 1;
         renderPage();
@@ -371,13 +363,14 @@
             const toggleCell = item.rowEl.querySelector('.row-toggle');
             if(toggleCell){
                 toggleCell.style.cursor='pointer';
-                toggleCell.addEventListener('click', ()=>{
+                toggleCell.addEventListener('click', (e)=>{
+                    e.stopPropagation();
                     if(!item.detailEl) return;
                     const isHidden = item.detailEl.style.display === 'none' || item.detailEl.style.display === '';
                     item.detailEl.style.display = isHidden ? 'table-row' : 'none';
                     toggleCell.textContent = isHidden ? '➖' : '➕';
                 });
-                // also allow clicking row to toggle
+                // also allow clicking row to toggle (small hand behaviour)
                 item.rowEl.addEventListener('click', (e)=>{
                     if(e.target === toggleCell) return; // already handled
                     if(!item.detailEl) return;
@@ -393,7 +386,6 @@
     function exportCSV(){
         const headerCells = ['Date','Intitulé','N° Siret','Montant','Détails'];
         const rows = [];
-        // exporter seulement les lignes visibles (filteredIndexList for current page)
         const perPage = parseInt(perPageSelect.value,10);
         const start = (currentPage-1)*perPage;
         const slice = filteredIndexList.slice(start, start + perPage);
@@ -409,31 +401,51 @@
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'remises_export.csv';
+        a.download = 'REMISSES_EXPORT.csv';
         document.body.appendChild(a); a.click(); a.remove();
         URL.revokeObjectURL(url);
     }
 
     function exportXLS(){
-        // construit worksheet à partir des données visibles
         const perPage = parseInt(perPageSelect.value,10);
         const start = (currentPage-1)*perPage;
         const slice = filteredIndexList.slice(start, start + perPage);
-        const wsData = [['Date','Intitulé','N° Siret','Montant','Détails']];
+        const wsData = [['DATE','INTITULÉ','N° SIRET','MONTANT','DÉTAILS']]; // titres en MAJUSCULES (US5 Epic5)
         slice.forEach(i => {
             const item = rowsData[i];
             wsData.push([item.dateText, item.intitule, item.siret, item.montant, item.detail]);
         });
         const wb = XLSX.utils.book_new();
         const ws = XLSX.utils.aoa_to_sheet(wsData);
-        XLSX.utils.book_append_sheet(wb, ws, 'Remises');
-        XLSX.writeFile(wb, 'remises_export.xlsx');
+        XLSX.utils.book_append_sheet(wb, ws, 'REMISSES');
+        XLSX.writeFile(wb, 'REMISSES_EXPORT.xlsx');
     }
 
     async function exportPDF(){
-        // utilise jsPDF autotable
+        // utilise jsPDF autotable et ajoute l'image du graphique si présent
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
+        // Titre en MAJUSCULE + éventuellement N° SIREN si unique
+        const uniqueSirets = Array.from(new Set(filteredIndexList.map(i => rowsData[i].siret)));
+        const sirenPart = uniqueSirets.length === 1 ? ` N° SIRET ${uniqueSirets[0]}` : '';
+        const dateExtraction = new Date().toLocaleDateString('fr-FR');
+        const title = `LISTE DES REMISES${sirenPart} - EXTRAIT DU ${dateExtraction}`.toUpperCase();
+        doc.setFontSize(12);
+        doc.text(title, 14, 12);
+
+        // ajouter capture du chart (si présent)
+        try {
+            const imgData = chartInstance.toBase64Image(); // PNG
+            // place image sous le titre
+            const imgY = 16;
+            const imgH = 50;
+            doc.addImage(imgData, 'PNG', 14, imgY, 180, imgH);
+            // table start after image
+            var startY = imgY + imgH + 6;
+        } catch(e){
+            var startY = 20;
+        }
+
         const perPage = parseInt(perPageSelect.value,10);
         const start = (currentPage-1)*perPage;
         const slice = filteredIndexList.slice(start, start + perPage);
@@ -441,49 +453,117 @@
             const item = rowsData[i];
             return [item.dateText, item.intitule, item.siret, item.montantText, item.detail];
         });
-        doc.setFontSize(12);
-        doc.text(`EXTRAIT DU ${new Date().toLocaleDateString('fr-FR')}`, 14, 16);
+
         doc.autoTable({
-            head: [['Date','Intitulé','N° Siret','Montant','Détails']],
+            head: [['DATE','INTITULÉ','N° SIRET','MONTANT','DÉTAILS']],
             body,
-            startY: 22,
+            startY,
             styles: { fontSize: 9 }
         });
-        doc.save('remises_export.pdf');
+
+        doc.save('REMISSES_EXPORT.pdf');
     }
 
     // ---------- graphique Chart.js ----------
     const ctx = document.getElementById('graphique').getContext('2d');
-    // datas de démo (tu pourras les lier à tes données serveur)
+
+    // helper: build labels from rowsData (unique sorted dates) or fallback to present labels
+    function getSortedUniqueDates(){
+        const dates = Array.from(new Set(rowsData.map(r => r.dateText)));
+        dates.sort((a,b) => parseDateDMY(a) - parseDateDMY(b));
+        return dates;
+    }
+
+    // compute datasets: chiffre d'affaire (somme positive) and impayés (somme négative absolute) per date label
+    function computeChartDatas(){
+        const labels = getSortedUniqueDates();
+        const caMap = {}; const impMap = {};
+        labels.forEach(l => { caMap[l]=0; impMap[l]=0; });
+        rowsData.forEach(r => {
+            if(!(r.dateText in caMap)){
+                caMap[r.dateText] = 0; impMap[r.dateText] = 0;
+            }
+            if(r.montant >= 0) caMap[r.dateText] += r.montant;
+            else impMap[r.dateText] += Math.abs(r.montant);
+        });
+        const caArr = labels.map(l => caMap[l]);
+        const impArr = labels.map(l => impMap[l]);
+        return { labels, caArr, impArr };
+    }
+
+    // initial chart datasets
+    let chartDataObj = computeChartDatas();
     const chartData = {
-        labels: ['26/08/25', '05/09/25', '15/09/25', '05/10/25'],
-        datasets: [{
-            label: 'Profit',
-            data: [1000, 5000, 5500, 15500],
-            borderColor: 'green',
-            backgroundColor: 'transparent',
-            tension: 0.2
-        }]
+        labels: chartDataObj.labels.length ? chartDataObj.labels : ['--'],
+        datasets: [
+            {
+                label: 'Chiffre d\'affaires',
+                data: chartDataObj.caArr.length ? chartDataObj.caArr : [0],
+                borderColor: 'green',
+                backgroundColor: 'transparent',
+                tension: 0.2,
+                type: 'line',
+                yAxisID: 'y'
+            },
+            {
+                label: 'Impayés',
+                data: chartDataObj.impArr.length ? chartDataObj.impArr : [0],
+                borderColor: 'red',
+                backgroundColor: 'rgba(255,0,0,0.1)',
+                type: 'bar',
+                yAxisID: 'y'
+            }
+        ]
     };
-    let currentChartType = 'line';
+
+    let currentChartType = 'line'; // controls primary default; chart supports mixed types (line + bar)
     const chartInstance = new Chart(ctx, {
         type: currentChartType,
         data: chartData,
         options: {
-            plugins: { legend: { display: false } },
+            plugins: { legend: { display: true } },
             scales: {
                 x: { title: { text: 'Date', display: true } },
-                y: { title: { text: 'Montant ($)', display: true } }
+                y: { title: { text: 'Montant ($)', display: true }, beginAtZero: true }
             }
         }
     });
 
+    // when toggling simple chart type, keep datasets but change global type for dataset 0
     document.getElementById('chartTypeSelect').addEventListener('change', (e)=>{
         const t = e.target.value;
-        // recréer le chart en changeant le type
-        chartInstance.config.type = t;
+        // keep second dataset as bar (impayés) for clarity, set CA dataset to requested type
+        chartInstance.config.data.datasets[0].type = t;
         chartInstance.update();
     });
+
+    // helper to refresh chart datasets after filtering/sorting
+    function updateChartDatasets(){
+        // rebuild from filtered rows only (for chart showing filtered view)
+        const labelsSet = new Set();
+        filteredIndexList.forEach(i => labelsSet.add(rowsData[i].dateText));
+        let labels = Array.from(labelsSet);
+        labels.sort((a,b) => parseDateDMY(a) - parseDateDMY(b));
+        if(labels.length === 0){
+            // fallback to all dates if none filtered
+            const all = computeChartDatas();
+            chartInstance.data.labels = all.labels;
+            chartInstance.data.datasets[0].data = all.caArr;
+            chartInstance.data.datasets[1].data = all.impArr;
+        } else {
+            const caMap = {}; const impMap = {};
+            labels.forEach(l => { caMap[l]=0; impMap[l]=0; });
+            filteredIndexList.forEach(i => {
+                const r = rowsData[i];
+                if(r.montant >= 0) caMap[r.dateText] += r.montant;
+                else impMap[r.dateText] += Math.abs(r.montant);
+            });
+            chartInstance.data.labels = labels;
+            chartInstance.data.datasets[0].data = labels.map(l => caMap[l]);
+            chartInstance.data.datasets[1].data = labels.map(l => impMap[l]);
+        }
+        chartInstance.update();
+    }
 
     // ---------- initialisation et events ----------
     function wireTableHeaders(){
@@ -540,11 +620,18 @@
 
         // accessibility/UX small improvement: show initial counts
         totalRemises.textContent = ` | ${rowsData.length} remises totales`;
+
+        // initialise le graphique avec les données calculées
+        const initial = computeChartDatas();
+        chartInstance.data.labels = initial.labels;
+        chartInstance.data.datasets[0].data = initial.caArr; // CA
+        chartInstance.data.datasets[1].data = initial.impArr; // impayés
+        chartInstance.update();
     }
 
     // run boot
     boot();
+</script>
 
-    </script>
 </body>
 </html>
