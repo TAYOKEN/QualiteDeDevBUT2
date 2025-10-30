@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Administration – Comptes utilisateurs</title>
+<link rel="stylesheet" href="css/dashboard3.css">
+
+</head>
+<body>
+
+<header>
+    <div class="logo">
+        <img src="" alt="logo">
+    </div>
+    <nav>
+        <a href="#">Tableau de bord</a>
+        <a href="#">Admin</a>
+    </nav>
+</header>
+
+<main>
+    <h1>Gestion des comptes utilisateurs</h1>
+
+    <div class="user-table">
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="🔍 Rechercher un utilisateur...">
+        </div>
+
+        <table id="userTable">
+            <thead>
+                <tr>
+                    <th>Nom d'utilisateur</th>
+                    <th>Email</th>
+                    <th>Rôle</th>
+                    <th>Date d'inscription</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Yanis</td>
+                    <td>yanis@example.com</td>
+                    <td>Admin</td>
+                    <td>2025-01-10</td>
+                    <td><button class="btn danger">Demander suppression</button></td>
+                </tr>
+                <tr>
+                    <td>Emma</td>
+                    <td>emma@mail.com</td>
+                    <td>Utilisateur</td>
+                    <td>2025-02-20</td>
+                    <td><button class="btn danger">Demander suppression</button></td>
+                </tr>
+                <tr>
+                    <td>Lucas</td>
+                    <td>lucas@gmail.com</td>
+                    <td>Utilisateur</td>
+                    <td>2025-03-05</td>
+                    <td><button class="btn danger">Demander suppression</button></td>
+                </tr>
+                <tr>
+                    <td>Sofia</td>
+                    <td>sofia@site.com</td>
+                    <td>Utilisateur</td>
+                    <td>2025-04-12</td>
+                    <td><button class="btn danger">Demander suppression</button></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+
+<div class="notif" id="notif">✅ Demande de suppression envoyée</div>
+    <script src="js/dashboard3.js"></script>
+
+
+</body>
+</html>

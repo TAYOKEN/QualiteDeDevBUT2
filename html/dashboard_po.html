@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Tableau de bord - Trésorerie</title>
+    <title>Tableau de bord - Trésorerie (avec recherche avancée & sidebar)</title>
 
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -13,41 +13,8 @@
 
     <!-- SheetJS pour export XLS (simple) -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+        <link rel="stylesheet" href="css/dashboard2.css">
 
-    <style>
-        :root{--bg:#f5f7fb;--card:#fff;--accent:#1f8a70;--danger:#d9534f;}
-        body {font-family: 'Poppins', sans-serif; background: linear-gradient(90deg, #ffffff, #ffffff); color: #222; margin: 0; padding: 0;}
-        header {background: linear-gradient(90deg, #b46ff1, #ff4ca8); color: white; display: flex; justify-content: space-between; align-items: center; padding: 10px 25px;}
-        header .logo img{height:36px;}
-        nav a{margin-right:16px;text-decoration:none;color:#333}
-        main{padding:20px;max-width:1200px;margin:18px auto;}
-        .infos{display:grid;grid-template-columns:1fr 1fr 2fr;gap:16px;margin-bottom:18px;}
-        .client-card,.solde-card,.chart-card{background:var(--card);padding:16px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.04)}
-        .client-card p{margin:0}
-        .solde-card .solde{margin:6px 0;font-size:28px;}
-        .controls{display:flex;gap:8px;align-items:center;margin-bottom:8px}
-        .transactions{background:var(--card);padding:12px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.04)}
-        table {width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);}        
-        th, td {padding: 12px 16px; text-align: left; border-bottom: 1px solid #ddd;}
-        th {background: #f4f2f9; color: #444; font-weight: 600; cursor: pointer;}
-        th .arrow{margin-left:6px}
-        tr.detail-row{display:none;background:#fbfbfb}
-        .row-toggle{cursor:pointer}
-        .negatif{color:var(--danger)}
-        .positif{color:green}
-        .totals{font-weight:700;padding:10px 0;text-align:right}
-        .pager{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-top:10px}
-        .pagination{display:flex;gap:6px}
-        .btn{padding:8px 10px;border-radius:6px;background:#f1f5f6;border:1px solid #e6eaec;cursor:pointer}
-        .btn.primary{background:var(--accent);color:#fff;border:none}
-        .badge{background:#eef7ef;color:#257a4b;padding:4px 8px;border-radius:6px;font-size:13px}
-        .color-band-1{background:#f7fbff}
-        .color-band-2{background:#fef7e6}
-        .color-band-3{background:#fff2f2}
-        .topbar-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-        .result-count{font-size:14px;margin-left:6px}
-        .small{font-size:13px;color:#666}
-    </style>
 </head>
 <body>
     <header>
@@ -86,6 +53,9 @@
                     </div>
                 </div>
                 <canvas id="graphique" style="max-height:220px"></canvas>
+                <div style="margin-top:10px"><strong>Répartition (Camembert)</strong>
+                    <canvas id="pieChart" style="max-height:160px"></canvas>
+                </div>
             </div>
         </section>
 
@@ -100,6 +70,13 @@
                 <div style="margin-left:auto; display:flex; gap:8px; align-items:center">
                     <label for="search" class="small">Recherche :</label>
                     <input id="search" placeholder="Rechercher (SIREN, intitulé, date, remise...)" />
+
+                    <!-- Recherche approfondie -->
+                    <label class="small">Recherche approfondie :</label>
+                    <input id="dateStart" type="date" class="btn" title="Date début" />
+                    <input id="dateEnd" type="date" class="btn" title="Date fin" />
+                    <button class="btn" id="applyDateRange">Appliquer</button>
+
                     <label class="small">Lignes :</label>
                     <select id="perPage" class="btn">
                         <option>5</option>
@@ -118,7 +95,7 @@
             <table id="table-clients" aria-describedby="result-count">
                 <thead>
                     <tr>
-                        <th data-type="text">Identifiant : <span class="arrow">↓</span></th>
+                        <th data-type="date">Date : <span class="arrow">↓</span></th>
                         <th data-type="text">Nom : <span class="arrow">↓</span></th>
                         <th data-type="text">N° Siret : <span class="arrow">↓</span></th>
                         <th data-type="number">Impayés : <span class="arrow">↓</span></th>
@@ -127,58 +104,59 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr class="data-row">
-                        <td>US9652125</td>
+                    <!-- Chaque tr.data-row contient maintenant des attributs data-impayes et data-remises (JSON encode) pour la sidebar -->
+                    <tr class="data-row" data-impayes='[{"date":"01/09/24","date_limite":"01/10/24","libelle":"Facture A","montant":1000},{"date":"05/09/24","date_limite":"05/11/24","libelle":"Facture B","montant":500}]' data-remises='[{"date":"02/09/24","date_limite":"-","libelle":"Remise 1","montant":200},{"date":"08/09/24","date_limite":"-","libelle":"Remise 2","montant":300}]'>
+                        <td>01/09/24</td>
                         <td>Yehven Kefa</td>
                         <td>784 671 695 00103</td>
-                        <td class="negatif">-1000 $</td>
-                        <td><button class="btn-acceder">⚙️ Accéder</button></td>
-                        <td><button class="btn-voir">👁️ Voir Plus</button></td>
+                        <td class="negatif">-1500 $</td>
+                        <td><button class="btn-acceder btn">⚙️ Accéder</button></td>
+                        <td><button class="btn-voir btn">👁️ Voir Plus</button></td>
                     </tr>
 
-                    <tr class="data-row">
-                        <td>US9652124</td>
+                    <tr class="data-row" data-impayes='[{"date":"10/09/24","date_limite":"10/10/24","libelle":"Facture C","montant":1500}]' data-remises='[{"date":"11/09/24","date_limite":"-","libelle":"Remise 3","montant":0}]'>
+                        <td>10/09/24</td>
                         <td>Thomas Noël</td>
                         <td>784 671 678 04403</td>
                         <td class="negatif">-1500 $</td>
-                        <td><button class="btn-acceder">⚙️ Accéder</button></td>
-                        <td><button class="btn-voir">👁️ Voir Plus</button></td>
+                        <td><button class="btn-acceder btn">⚙️ Accéder</button></td>
+                        <td><button class="btn-voir btn">👁️ Voir Plus</button></td>
                     </tr>
 
-                    <tr class="data-row">
-                        <td>US9652123</td>
+                    <tr class="data-row" data-impayes='[{"date":"15/09/24","date_limite":"15/10/24","libelle":"Facture D","montant":2000}]' data-remises='[{"date":"16/09/24","date_limite":"-","libelle":"Remise 4","montant":0}]'>
+                        <td>15/09/24</td>
                         <td>Yanis Boukayouh</td>
                         <td>784 671 695 00103</td>
                         <td class="negatif">-2000 $</td>
-                        <td><button class="btn-acceder">⚙️ Accéder</button></td>
-                        <td><button class="btn-voir">👁️ Voir Plus</button></td>
+                        <td><button class="btn-acceder btn">⚙️ Accéder</button></td>
+                        <td><button class="btn-voir btn">👁️ Voir Plus</button></td>
                     </tr>
 
-                    <tr class="data-row">
-                        <td>US9652122</td>
+                    <tr class="data-row" data-impayes='[]' data-remises='[{"date":"20/09/24","date_limite":"-","libelle":"Remise 5","montant":0}]'>
+                        <td>20/09/24</td>
                         <td>Rayan Essaidi</td>
                         <td>784 671 695 08423</td>
                         <td class="positif">0</td>
-                        <td><button class="btn-acceder">⚙️ Accéder</button></td>
-                        <td><button class="btn-voir">👁️ Voir Plus</button></td>
+                        <td><button class="btn-acceder btn">⚙️ Accéder</button></td>
+                        <td><button class="btn-voir btn">👁️ Voir Plus</button></td>
                     </tr>
 
-                    <tr class="data-row">
-                        <td>US9652121</td>
+                    <tr class="data-row" data-impayes='[{"date":"01/08/24","date_limite":"01/09/24","libelle":"Facture E","montant":2000}]' data-remises='[]'>
+                        <td>01/08/24</td>
                         <td>Hamza Revel</td>
                         <td>784 671 695 00103</td>
                         <td class="negatif">-2000 $</td>
-                        <td><button class="btn-acceder">⚙️ Accéder</button></td>
-                        <td><button class="btn-voir">👁️ Voir Plus</button></td>
+                        <td><button class="btn-acceder btn">⚙️ Accéder</button></td>
+                        <td><button class="btn-voir btn">👁️ Voir Plus</button></td>
                     </tr>
 
-                    <tr class="data-row">
-                        <td>US9652120</td>
+                    <tr class="data-row" data-impayes='[]' data-remises='[]'>
+                        <td>25/09/24</td>
                         <td>John Pork</td>
                         <td>784 671 695 00104</td>
                         <td class="positif">0</td>
-                        <td><button class="btn-acceder">⚙️ Accéder</button></td>
-                        <td><button class="btn-voir">👁️ Voir Plus</button></td>
+                        <td><button class="btn-acceder btn">⚙️ Accéder</button></td>
+                        <td><button class="btn-voir btn">👁️ Voir Plus</button></td>
                     </tr>
                 </tbody>
 
@@ -198,440 +176,32 @@
             </div>
         </section>
     </main>
-    <script>
-const table = document.getElementById('table-clients');
-    const tbody = table.querySelector('tbody');
-    const headers = table.querySelectorAll('th[data-type]');
-    const perPageSelect = document.getElementById('perPage');
-    const searchInput = document.getElementById('search');
-    const resultCountEl = document.getElementById('result-count');
-    const visibleTotalEl = document.getElementById('visible-total');
-    const totalNegDisplay = document.getElementById('total-neg-display');
-    const totalRemises = document.getElementById('total-remises');
 
-    let rowsData = []; // tableau d'objets dérivés du DOM
-    let filteredIndexList = []; // indices des rowsData affichés après filtre
-    let currentPage = 1;
+    <!-- SIDEBAR pour "Voir Plus" -->
+    <div class="sidebar-backdrop" id="sidebarBackdrop">
+        <aside class="sidebar" id="sidebar">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+                <h3 id="sidebarTitle">Détails</h3>
+                <div class="close" id="sidebarClose">✖</div>
+            </div>
 
-    // parse un montant (ex: "+1 000$" ou "-1000$")
-    function parseAmount(text){
-        if(!text) return 0;
-        const cleaned = text.replace(/\s/g,'').replace('€','').replace('$','');
-        const num = parseFloat(cleaned.replace('+','').replace('-','')) || 0;
-        return text.includes('-') ? -Math.abs(num) : Math.abs(num);
-    }
+            <div style="margin-top:8px;display:flex;gap:8px;align-items:center;">
+                <button class="btn" id="export-sidebar-csv">Export CSV</button>
+                <button class="btn" id="export-sidebar-xls">Export XLS</button>
+                <button class="btn" id="export-sidebar-pdf">Export PDF</button>
+                <div style="margin-left:auto"><span class="small" id="sidebarTotals"></span></div>
+            </div>
 
-    // parse date format dd/mm/yy into Date object (année 2000+yy)
-    function parseDateDMY(text){
-        const parts = text.split('/');
-        if(parts.length !== 3) return new Date(text);
-        const d = parseInt(parts[0],10), m = parseInt(parts[1],10), yRaw = parseInt(parts[2],10);
-        const y = yRaw < 100 ? 2000 + yRaw : yRaw;
-        return new Date(y, m-1, d);
-    }
+            <h4>Impayés</h4>
+            <table id="impayesTable"><thead><tr><th>Date</th><th>Date limite</th><th>Libellé</th><th>Montant</th></tr></thead><tbody></tbody></table>
 
-    // initialiser rowsData depuis le DOM (assume chaque data-row suivi de detail-row)
-    function initRows(){
-        rowsData = [];
-        const dataRows = Array.from(tbody.querySelectorAll('tr.data-row'));
-        dataRows.forEach((r, idx) => {
-            const cells = r.children;
-            const date = cells[0].textContent.trim();
-            const intitule = cells[1].textContent.trim();
-            const siret = cells[2].textContent.trim();
-            const montantText = cells[3].textContent.trim();
-            const montant = parseAmount(montantText);
-            const detailRow = r.nextElementSibling && r.nextElementSibling.classList.contains('detail-row') ? r.nextElementSibling : null;
-            const detail = detailRow ? detailRow.children[0].textContent.trim() : '';
-            rowsData.push({rowEl:r, detailEl: detailRow, dateText:date, dateObj: parseDateDMY(date), intitule, siret, montant, montantText, detail});
-        });
-    }
+            <h4 style="margin-top:12px">Rémises</h4>
+            <table id="remisesTable"><thead><tr><th>Date</th><th>Date limite</th><th>Libellé</th><th>Montant</th></tr></thead><tbody></tbody></table>
+        </aside>
+    </div>
 
-    // colorisation par tranche (tranche = 100). On utilise 3 classes
-    // bucket = floor(abs(montant)/100)
-    // logique: bucket 0-1 => band1, 2-9 => band2, >=10 => band3 (pour lisibilité)
-    function applyColorBands(){
-        rowsData.forEach(item => {
-            item.rowEl.classList.remove('color-band-1','color-band-2','color-band-3');
-            const absM = Math.abs(item.montant);
-            const bucket = Math.floor(absM / 100);
-            if(bucket <= 1) item.rowEl.classList.add('color-band-1');        // < 200$
-            else if(bucket <= 9) item.rowEl.classList.add('color-band-2');   // 200 - 999$
-            else item.rowEl.classList.add('color-band-3');                   // >= 1000$
-        });
-    }
+    <script src="js/dashboard2.js"></script>
 
-    // mise à jour des compteurs, totaux affichés
-    function updateCountersAndTotals(visibleIndices){
-        // total visible
-        let total = 0;
-        let totalNeg = 0;
-        visibleIndices.forEach(i => {
-            total += rowsData[i].montant;
-            if(rowsData[i].montant < 0) totalNeg += rowsData[i].montant;
-        });
-        visibleTotalEl.textContent = (total >= 0 ? '+' : '') + total.toLocaleString() + '$';
-        if(total < 0) {
-            visibleTotalEl.classList.add('negatif');
-        } else {
-            visibleTotalEl.classList.remove('negatif');
-        }
-
-        if(totalNeg < 0){
-            totalNegDisplay.textContent = `Total impayés (visible) : ${totalNeg.toLocaleString()} $`;
-            totalNegDisplay.style.color = 'var(--danger)';
-        } else {
-            totalNegDisplay.textContent = '';
-        }
-
-        // total remises = nb de lignes (peut être changé pour compter remises réelles)
-        totalRemises.textContent = ` | ${filteredIndexList.length} remises trouvées`;
-        resultCountEl.textContent = `${filteredIndexList.length} résultat(s)`;
-    }
-
-    // rend visible une page (pagination)
-    function renderPage(){
-        const perPage = parseInt(perPageSelect.value,10);
-        const total = filteredIndexList.length;
-        const totalPages = Math.max(1, Math.ceil(total / perPage));
-        if(currentPage > totalPages) currentPage = totalPages;
-        const start = (currentPage - 1) * perPage;
-        const slice = filteredIndexList.slice(start, start + perPage);
-
-        // hide all rows first
-        rowsData.forEach(item => {
-            item.rowEl.style.display = 'none';
-            if(item.detailEl) item.detailEl.style.display = 'none';
-        });
-
-        // show only slice
-        rowsData.forEach((item,i) => {
-            if(slice.includes(i)){
-                item.rowEl.style.display = 'table-row';
-            }
-        });
-
-        // update pagination UI
-        const paginationEl = document.getElementById('pagination');
-        paginationEl.innerHTML = '';
-        for(let p = 1; p <= totalPages; p++){
-            const btn = document.createElement('button');
-            btn.textContent = p;
-            btn.className = 'btn';
-            if(p === currentPage) btn.classList.add('primary');
-            btn.addEventListener('click', ()=>{ currentPage = p; renderPage(); });
-            paginationEl.appendChild(btn);
-        }
-
-        updateCountersAndTotals(slice);
-    }
-
-    // filtrer selon la recherche (sur date, intitulé, siret, montant, detail)
-    function applyFilterAndRefresh(){
-        const q = searchInput.value.trim().toLowerCase();
-        filteredIndexList = [];
-        rowsData.forEach((item, idx) => {
-            const hay = (item.dateText + ' ' + item.intitule + ' ' + item.siret + ' ' + item.montantText + ' ' + item.detail).toLowerCase();
-            if(hay.includes(q)) filteredIndexList.push(idx);
-        });
-        currentPage = 1;
-        renderPage();
-        // quand le filtre change, on met à jour aussi le graphique secondaire (impayés)
-        updateChartDatasets();
-    }
-
-    // tri des lignes (index col, type, ascending)
-    function sortRows(indexCol, type, ascending){
-        const compare = (a,b) => {
-            if(type === 'number') return ascending ? a.montant - b.montant : b.montant - a.montant;
-            if(type === 'date') return ascending ? a.dateObj - b.dateObj : b.dateObj - a.dateObj;
-            // text (indexCol 1 => intitulé, 2 => siret)
-            const aa = (indexCol===1? a.intitule : a.siret).toLowerCase();
-            const bb = (indexCol===1? b.intitule : b.siret).toLowerCase();
-            return ascending ? aa.localeCompare(bb) : bb.localeCompare(aa);
-        };
-
-        // sort filteredIndexList by comparing underlying rowsData
-        filteredIndexList.sort((i,j) => compare(rowsData[i], rowsData[j]));
-        currentPage = 1;
-        renderPage();
-    }
-
-    // toggle detail row
-    function attachRowToggles(){
-        rowsData.forEach(item => {
-            const toggleCell = item.rowEl.querySelector('.row-toggle');
-            if(toggleCell){
-                toggleCell.style.cursor='pointer';
-                toggleCell.addEventListener('click', (e)=>{
-                    e.stopPropagation();
-                    if(!item.detailEl) return;
-                    const isHidden = item.detailEl.style.display === 'none' || item.detailEl.style.display === '';
-                    item.detailEl.style.display = isHidden ? 'table-row' : 'none';
-                    toggleCell.textContent = isHidden ? '➖' : '➕';
-                });
-                // also allow clicking row to toggle (small hand behaviour)
-                item.rowEl.addEventListener('click', (e)=>{
-                    if(e.target === toggleCell) return; // already handled
-                    if(!item.detailEl) return;
-                    const isHidden = item.detailEl.style.display === 'none' || item.detailEl.style.display === '';
-                    item.detailEl.style.display = isHidden ? 'table-row' : 'none';
-                    toggleCell.textContent = isHidden ? '➖' : '➕';
-                });
-            }
-        });
-    }
-
-    // exports
-    function exportCSV(){
-        const headerCells = ['Date','Intitulé','N° Siret','Montant','Détails'];
-        const rows = [];
-        const perPage = parseInt(perPageSelect.value,10);
-        const start = (currentPage-1)*perPage;
-        const slice = filteredIndexList.slice(start, start + perPage);
-        slice.forEach(i => {
-            const item = rowsData[i];
-            rows.push([item.dateText, item.intitule, item.siret, item.montantText, item.detail]);
-        });
-        let csv = headerCells.join(';') + '\n';
-        rows.forEach(r => {
-            csv += r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(';') + '\n';
-        });
-        const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'REMISSES_EXPORT.csv';
-        document.body.appendChild(a); a.click(); a.remove();
-        URL.revokeObjectURL(url);
-    }
-
-    function exportXLS(){
-        const perPage = parseInt(perPageSelect.value,10);
-        const start = (currentPage-1)*perPage;
-        const slice = filteredIndexList.slice(start, start + perPage);
-        const wsData = [['DATE','INTITULÉ','N° SIRET','MONTANT','DÉTAILS']]; // titres en MAJUSCULES (US5 Epic5)
-        slice.forEach(i => {
-            const item = rowsData[i];
-            wsData.push([item.dateText, item.intitule, item.siret, item.montant, item.detail]);
-        });
-        const wb = XLSX.utils.book_new();
-        const ws = XLSX.utils.aoa_to_sheet(wsData);
-        XLSX.utils.book_append_sheet(wb, ws, 'REMISSES');
-        XLSX.writeFile(wb, 'REMISSES_EXPORT.xlsx');
-    }
-
-    async function exportPDF(){
-        // utilise jsPDF autotable et ajoute l'image du graphique si présent
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        // Titre en MAJUSCULE + éventuellement N° SIREN si unique
-        const uniqueSirets = Array.from(new Set(filteredIndexList.map(i => rowsData[i].siret)));
-        const sirenPart = uniqueSirets.length === 1 ? ` N° SIRET ${uniqueSirets[0]}` : '';
-        const dateExtraction = new Date().toLocaleDateString('fr-FR');
-        const title = `LISTE DES REMISES${sirenPart} - EXTRAIT DU ${dateExtraction}`.toUpperCase();
-        doc.setFontSize(12);
-        doc.text(title, 14, 12);
-
-        // ajouter capture du chart (si présent)
-        try {
-            const imgData = chartInstance.toBase64Image(); // PNG
-            // place image sous le titre
-            const imgY = 16;
-            const imgH = 50;
-            doc.addImage(imgData, 'PNG', 14, imgY, 180, imgH);
-            // table start after image
-            var startY = imgY + imgH + 6;
-        } catch(e){
-            var startY = 20;
-        }
-
-        const perPage = parseInt(perPageSelect.value,10);
-        const start = (currentPage-1)*perPage;
-        const slice = filteredIndexList.slice(start, start + perPage);
-        const body = slice.map(i => {
-            const item = rowsData[i];
-            return [item.dateText, item.intitule, item.siret, item.montantText, item.detail];
-        });
-
-        doc.autoTable({
-            head: [['DATE','INTITULÉ','N° SIRET','MONTANT','DÉTAILS']],
-            body,
-            startY,
-            styles: { fontSize: 9 }
-        });
-
-        doc.save('REMISSES_EXPORT.pdf');
-    }
-
-    // ---------- graphique Chart.js ----------
-    const ctx = document.getElementById('graphique').getContext('2d');
-
-    // helper: build labels from rowsData (unique sorted dates) or fallback to present labels
-    function getSortedUniqueDates(){
-        const dates = Array.from(new Set(rowsData.map(r => r.dateText)));
-        dates.sort((a,b) => parseDateDMY(a) - parseDateDMY(b));
-        return dates;
-    }
-
-    // compute datasets: chiffre d'affaire (somme positive) and impayés (somme négative absolute) per date label
-    function computeChartDatas(){
-        const labels = getSortedUniqueDates();
-        const caMap = {}; const impMap = {};
-        labels.forEach(l => { caMap[l]=0; impMap[l]=0; });
-        rowsData.forEach(r => {
-            if(!(r.dateText in caMap)){
-                caMap[r.dateText] = 0; impMap[r.dateText] = 0;
-            }
-            if(r.montant >= 0) caMap[r.dateText] += r.montant;
-            else impMap[r.dateText] += Math.abs(r.montant);
-        });
-        const caArr = labels.map(l => caMap[l]);
-        const impArr = labels.map(l => impMap[l]);
-        return { labels, caArr, impArr };
-    }
-
-    // initial chart datasets
-    let chartDataObj = computeChartDatas();
-    const chartData = {
-        labels: chartDataObj.labels.length ? chartDataObj.labels : ['--'],
-        datasets: [
-            {
-                label: 'Chiffre d\'affaires',
-                data: chartDataObj.caArr.length ? chartDataObj.caArr : [0],
-                borderColor: 'green',
-                backgroundColor: 'transparent',
-                tension: 0.2,
-                type: 'line',
-                yAxisID: 'y'
-            },
-            {
-                label: 'Impayés',
-                data: chartDataObj.impArr.length ? chartDataObj.impArr : [0],
-                borderColor: 'red',
-                backgroundColor: 'rgba(255,0,0,0.1)',
-                type: 'bar',
-                yAxisID: 'y'
-            }
-        ]
-    };
-
-    let currentChartType = 'line'; // controls primary default; chart supports mixed types (line + bar)
-    const chartInstance = new Chart(ctx, {
-        type: currentChartType,
-        data: chartData,
-        options: {
-            plugins: { legend: { display: true } },
-            scales: {
-                x: { title: { text: 'Date', display: true } },
-                y: { title: { text: 'Montant ($)', display: true }, beginAtZero: true }
-            }
-        }
-    });
-
-    // when toggling simple chart type, keep datasets but change global type for dataset 0
-    document.getElementById('chartTypeSelect').addEventListener('change', (e)=>{
-        const t = e.target.value;
-        // keep second dataset as bar (impayés) for clarity, set CA dataset to requested type
-        chartInstance.config.data.datasets[0].type = t;
-        chartInstance.update();
-    });
-
-    // helper to refresh chart datasets after filtering/sorting
-    function updateChartDatasets(){
-        // rebuild from filtered rows only (for chart showing filtered view)
-        const labelsSet = new Set();
-        filteredIndexList.forEach(i => labelsSet.add(rowsData[i].dateText));
-        let labels = Array.from(labelsSet);
-        labels.sort((a,b) => parseDateDMY(a) - parseDateDMY(b));
-        if(labels.length === 0){
-            // fallback to all dates if none filtered
-            const all = computeChartDatas();
-            chartInstance.data.labels = all.labels;
-            chartInstance.data.datasets[0].data = all.caArr;
-            chartInstance.data.datasets[1].data = all.impArr;
-        } else {
-            const caMap = {}; const impMap = {};
-            labels.forEach(l => { caMap[l]=0; impMap[l]=0; });
-            filteredIndexList.forEach(i => {
-                const r = rowsData[i];
-                if(r.montant >= 0) caMap[r.dateText] += r.montant;
-                else impMap[r.dateText] += Math.abs(r.montant);
-            });
-            chartInstance.data.labels = labels;
-            chartInstance.data.datasets[0].data = labels.map(l => caMap[l]);
-            chartInstance.data.datasets[1].data = labels.map(l => impMap[l]);
-        }
-        chartInstance.update();
-    }
-
-    // ---------- initialisation et events ----------
-    function wireTableHeaders(){
-        headers.forEach((header, idx) => {
-            header.addEventListener('click', ()=>{
-                const type = header.dataset.type;
-                const index = idx; // 0=date,1=text,2=text,3=number
-                const arrow = header.querySelector('.arrow');
-                const ascending = arrow.textContent === '↓'; // toggling behavior
-                // toggle arrows (reset others)
-                headers.forEach(h => { const a = h.querySelector('.arrow'); if(a) a.textContent = '↓'; });
-                arrow.textContent = ascending ? '↑' : '↓';
-                sortRows(index, type, ascending);
-            });
-        });
-    }
-
-    document.getElementById('perPage').addEventListener('change', ()=>{
-        currentPage = 1;
-        renderPage();
-    });
-    document.getElementById('prevPage').addEventListener('click', ()=>{
-        if(currentPage>1){ currentPage--; renderPage(); }
-    });
-    document.getElementById('nextPage').addEventListener('click', ()=>{
-        const perPage = parseInt(perPageSelect.value,10);
-        const totalPages = Math.max(1, Math.ceil(filteredIndexList.length / perPage));
-        if(currentPage < totalPages){ currentPage++; renderPage(); }
-    });
-
-    searchInput.addEventListener('input', ()=>{ applyFilterAndRefresh(); });
-
-    document.getElementById('export-csv').addEventListener('click', exportCSV);
-    document.getElementById('export-xls').addEventListener('click', exportXLS);
-    document.getElementById('export-pdf').addEventListener('click', exportPDF);
-
-    // wrapper pour initialiser l'UI
-    function boot(){
-        initRows();
-        applyColorBands();
-        attachRowToggles();
-        wireTableHeaders();
-
-        // initial filtered list = tout
-        filteredIndexList = rowsData.map((_, idx) => idx);
-        currentPage = 1;
-        renderPage();
-
-        // calcule solde global (démonstration : sommation de tous)
-        const solde = rowsData.reduce((acc, r) => acc + r.montant, 0);
-        const soldeEl = document.getElementById('solde-global');
-        soldeEl.textContent = (solde >= 0 ? '+' : '') + solde.toLocaleString() + '$';
-        if(solde < 0) soldeEl.classList.add('negatif');
-
-        // accessibility/UX small improvement: show initial counts
-        totalRemises.textContent = ` | ${rowsData.length} remises totales`;
-
-        // initialise le graphique avec les données calculées
-        const initial = computeChartDatas();
-        chartInstance.data.labels = initial.labels;
-        chartInstance.data.datasets[0].data = initial.caArr; // CA
-        chartInstance.data.datasets[1].data = initial.impArr; // impayés
-        chartInstance.update();
-    }
-
-    // run boot
-    boot();
-</script>
 
 </body>
 </html>
