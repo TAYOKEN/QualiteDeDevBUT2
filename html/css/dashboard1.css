@@ -1,64 +1,185 @@
-        :root{--bg:#f5f7fb;--card:#fff;--accent:#1f8a70;--danger:#d9534f;}
-    body {
-        font-family: 'Poppins', sans-serif;
-        background: linear-gradient(90deg, #ffffff, #ffffff);
-        color: #222;
-        margin: 0;
-        padding: 0;
-        }
+:root {
+    --bg: #f5f7fb;
+    --card: #fff;
+    --accent: #1f8a70;
+    --danger: #d9534f;
+}
 
-        header {
-            background: linear-gradient(90deg, #b46ff1, #ff4ca8);
-            color: white;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 25px;
-        }
+/* BODY */
+body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(90deg, #ffffff, #ffffff);
+    color: #222;
+    margin: 0;
+    padding: 0;
+}
 
-        header .logo img{height:36px;}
-        nav a{margin-right:16px;text-decoration:none;color:#333}
-        main{padding:20px;max-width:1200px;margin:18px auto;}
-        .infos{display:grid;grid-template-columns:1fr 1fr 2fr;gap:16px;margin-bottom:18px;}
-        .client-card,.solde-card,.chart-card{background:var(--card);padding:16px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.04)}
-        .client-card p{margin:0}
-        .solde-card .solde{margin:6px 0;font-size:28px;}
-        .controls{display:flex;gap:8px;align-items:center;margin-bottom:8px}
-        .transactions{background:var(--card);padding:12px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.04)}
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            }        
-            th, td {
-            padding: 12px 16px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-            }
+/* HEADER */
+header {
+    background: linear-gradient(90deg, #b46ff1, #ff4ca8);
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 25px;
+}
+header .logo img {
+    height: 36px;
+}
+nav a {
+    margin-right: 16px;
+    text-decoration: none;
+    color: #333;
+}
 
-            th {
-                 background: #f4f2f9;
-                  color: #444;
-                     font-weight: 600;
-                 cursor: pointer;
-                }
-        th .arrow{margin-left:6px}
-        tr.detail-row{display:none;background:#fbfbfb}
-        .row-toggle{cursor:pointer}
-        .negatif{color:var(--danger)}
-        .positif{color:green}
-        .totals{font-weight:700;padding:10px 0;text-align:right}
-        .pager{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-top:10px}
-        .pagination{display:flex;gap:6px}
-        .btn{padding:8px 10px;border-radius:6px;background:#f1f5f6;border:1px solid #e6eaec;cursor:pointer}
-        .btn.primary{background:var(--accent);color:#fff;border:none}
-        .badge{background:#eef7ef;color:#257a4b;padding:4px 8px;border-radius:6px;font-size:13px}
-        .color-band-1{background:#f7fbff}
-        .color-band-2{background:#fef7e6}
-        .color-band-3{background:#fff2f2}
-        .topbar-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-        .result-count{font-size:14px;margin-left:6px}
-        .small{font-size:13px;color:#666}
+/* MAIN CONTENT */
+main {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 18px auto;
+}
+
+/* INFO CARDS */
+.infos {
+    display: grid;
+    grid-template-columns: 1fr 1fr 2fr;
+    gap: 16px;
+    margin-bottom: 18px;
+}
+.client-card,
+.solde-card,
+.chart-card {
+    background: var(--card);
+    padding: 16px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.04);
+}
+.client-card p {
+    margin: 0;
+}
+.solde-card .solde {
+    margin: 6px 0;
+    font-size: 28px;
+}
+
+/* CONTROLS */
+.controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+/* TRANSACTIONS TABLE */
+.transactions {
+    background: var(--card);
+    padding: 12px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.04);
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+th,
+td {
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+th {
+    background: #f4f2f9;
+    color: #444;
+    font-weight: 600;
+    cursor: pointer;
+}
+th .arrow {
+    margin-left: 6px;
+}
+tr.detail-row {
+    display: none;
+    background: #fbfbfb;
+}
+.row-toggle {
+    cursor: pointer;
+}
+
+/* COLORS */
+.negatif {
+    color: var(--danger);
+}
+.positif {
+    color: green;
+}
+.totals {
+    font-weight: 700;
+    padding: 10px 0;
+    text-align: right;
+}
+
+/* PAGINATION */
+.pager {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+.pagination {
+    display: flex;
+    gap: 6px;
+}
+
+/* BUTTONS */
+.btn {
+    padding: 8px 10px;
+    border-radius: 6px;
+    background: #f1f5f6;
+    border: 1px solid #e6eaec;
+    cursor: pointer;
+}
+.btn.primary {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+}
+
+/* BADGES */
+.badge {
+    background: #eef7ef;
+    color: #257a4b;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 13px;
+}
+
+/* COLOR BANDS */
+.color-band-1 {
+    background: #f7fbff;
+}
+.color-band-2 {
+    background: #fef7e6;
+}
+.color-band-3 {
+    background: #fff2f2;
+}
+
+/* TOPBAR */
+.topbar-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+.result-count {
+    font-size: 14px;
+    margin-left: 6px;
+}
+.small {
+    font-size: 13px;
+    color: #666;
+}
