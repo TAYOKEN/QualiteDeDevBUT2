@@ -32,6 +32,7 @@
         rowsData = [];
         const dataRows = Array.from(tbody.querySelectorAll('tr.data-row'));
         dataRows.forEach((r, idx) => {
+            r.dataset.rowId = idx;  // <<< add in DOM index line
             const cells = r.children;
             const date = cells[0].textContent.trim();
             const intitule = cells[1].textContent.trim();
@@ -332,8 +333,13 @@
     // Voir Plus buttons binding
     function attachVoirPlus(){
         const voirBtns = Array.from(document.querySelectorAll('.btn-voir'));
-        voirBtns.forEach((b, idx) => {
-            b.addEventListener('click', (e)=>{ e.stopPropagation(); openSidebarForRow(idx); });
+        voirBtns.forEach((btn) => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const tr = btn.closest('tr');
+                const realIndex = parseInt(tr.dataset.rowId, 10);
+                openSidebarForRow(realIndex);
+            });
         });
     }
 
@@ -352,6 +358,42 @@
         });
     }
 
+    //---------remise for PO ----------------//
+    function getAllRemises(){
+        const result = [];
+        rowsData.forEach(item => {
+            item.remises.forEach(r => {
+                result.push({
+                    entreprise: item.intitule,
+                    siret: item.siret,
+                    date: r.date,
+                    libelle: r.libelle,
+                    montant: r.montant
+                });
+            });
+        });
+        return result;
+    }
+    function openGlobalRemises(){
+        const modal = document.getElementById('globalRemisesModal');
+        const tbody = document.querySelector('#globalRemisesTable tbody');
+        tbody.innerHTML = '';
+
+        const all = getAllRemises();
+        all.forEach(r=>{
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${r.entreprise}</td>
+                <td>${r.siret}</td>
+                <td>${r.date}</td>
+                <td>${r.libelle}</td>
+                <td>${r.montant} $</td>`;
+            tbody.appendChild(tr);
+        });
+
+        modal.style.display = 'flex';
+    }
+
     document.getElementById('perPage').addEventListener('change', ()=>{ currentPage = 1; renderPage(); });
     document.getElementById('prevPage').addEventListener('click', ()=>{ if(currentPage>1){ currentPage--; renderPage(); } });
     document.getElementById('nextPage').addEventListener('click', ()=>{ const perPage = parseInt(perPageSelect.value,10); const totalPages = Math.max(1, Math.ceil(filteredIndexList.length / perPage)); if(currentPage < totalPages){ currentPage++; renderPage(); } });
@@ -362,6 +404,19 @@
     document.getElementById('export-csv').addEventListener('click', ()=>{ exportCSV(false); });
     document.getElementById('export-xls').addEventListener('click', ()=>{ exportXLS(false); });
     document.getElementById('export-pdf').addEventListener('click', ()=>{ exportPDF(false); });
+    //--------modal window with remise for PO-------------//
+    document.getElementById('close-global-remises')
+        .addEventListener('click', () => {
+            document.getElementById('globalRemisesModal').style.display = 'none';
+        });
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('btn-global-remises').addEventListener('click', openGlobalRemises);
+        const globalModal = document.getElementById('globalRemisesModal');
+        globalModal.addEventListener('click', (e) => {
+            if (e.target === globalModal) globalModal.style.display = 'none';
+        });
+    });
+
 
     function boot(){
         initRows(); applyColorBands(); wireTableHeaders(); attachVoirPlus();
@@ -372,5 +427,8 @@
         totalRemises.textContent = ` | ${rowsData.length} remises totales`;
         const initial = computeChartDatas(); chartInstance.data.labels = initial.labels; chartInstance.data.datasets[0].data = initial.caArr; chartInstance.data.datasets[1].data = initial.impArr; chartInstance.update(); updatePieChart();
     }
+
+
+
 
     boot();
