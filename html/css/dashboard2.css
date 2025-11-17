@@ -36,5 +36,27 @@
         .sidebar h3{margin-top:0}
         .sidebar .close{cursor:pointer}
 
+
+.modal-backdrop {
+    position: fixed;       /* Щоб завжди поверх контенту */
+    inset: 0;              /* top:0; right:0; bottom:0; left:0 */
+    display: none;         /* Для центрованої модалки */
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.5); /* Напівпрозорий фон */
+    z-index: 1000;       /* Над усім іншим */
+}
+
+#globalRemisesModal .modal-content {
+    background: var(--card);
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 90%;
+    max-height: 80%;
+    overflow: auto;
+    display: flex;
+}
+
+
         /* compact responsive */
         @media (max-width:900px){ .infos{grid-template-columns:1fr;}}   

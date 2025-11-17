@@ -172,6 +172,7 @@
                 <div>
                     <button class="btn" id="prevPage">Préc</button>
                     <button class="btn" id="nextPage">Suiv</button>
+                    <button id="btn-global-remises" class="btn primary">Toutes les remises</button>
                 </div>
             </div>
         </section>
@@ -200,8 +201,36 @@
         </aside>
     </div>
 
-    <script src="js/dashboard2.js"></script>
 
+
+<div id="globalRemisesModal" class="modal-backdrop" >
+    <div class="modal-window">
+        <h2>Toutes les remises</h2>
+        <button id="close-global-remises">Close</button>
+
+        <table id="globalRemisesTable">
+            <thead>
+                <tr>
+                    <th>Entreprise</th>
+                    <th>SIRET</th>
+                    <th>Date</th>
+                    <th>Libellé</th>
+                    <th>Montant</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+
+        <div class="export-global-remises">
+            <button id="export-global-remises-csv" class="btn">CSV</button>
+            <button id="export-global-remises-xls" class="btn">XLS</button>
+            <button id="export-global-remises-pdf" class="btn">PDF</button>
+        </div>
+    </div>
+</div>
+
+<!-- JS LAST -->
+<script src="js/dashboard2.js"></script>
 
 </body>
 </html>
