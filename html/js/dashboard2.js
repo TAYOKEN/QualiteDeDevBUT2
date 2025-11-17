@@ -104,7 +104,7 @@
         updateCountersAndTotals(slice);
     }
 
-    function applyFilterAndRefresh(){
+    function applyFilterAndRefresh() {
         const q = searchInput.value.trim().toLowerCase();
         const startDateInput = document.getElementById('dateStart').value;
         const endDateInput = document.getElementById('dateEnd').value;
@@ -112,21 +112,31 @@
         const endDate = endDateInput ? new Date(endDateInput) : null;
 
         filteredIndexList = [];
+
         rowsData.forEach((item, idx) => {
-            const hay = (item.dateText + ' ' + item.intitule + ' ' + item.siret + ' ' + item.montantText).toLowerCase();
-            if(!hay.includes(q)) return; // quick text filter
-            // date-range filter if provided
-            if(startDate || endDate){
+            // Базовий текстовий пошук
+            let hay = (item.dateText + ' ' + item.intitule + ' ' + item.siret + ' ' + item.montantText).toLowerCase();
+
+            // Додаємо пошук по numéro de remise (libelle)
+            const remiseMatch = item.remises.some(r => r.libelle.toLowerCase().includes(q));
+
+            if (!hay.includes(q) && !remiseMatch) return;
+
+            // Фільтр по даті
+            if (startDate || endDate) {
                 const d = item.dateObj;
-                if(startDate && d < startDate) return;
-                if(endDate && d > (new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate(), 23,59,59))) return;
+                if (startDate && d < startDate) return;
+                if (endDate && d > (new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate(), 23,59,59))) return;
             }
+
             filteredIndexList.push(idx);
         });
+
         currentPage = 1;
         renderPage();
         updateChartDatasets();
     }
+
 
     function sortRows(indexCol, type, ascending){
         const compare = (a,b) => {
