@@ -1,0 +1,131 @@
+    :root {
+        --bg:#f5f7fb;
+        --card:#fff;
+        --accent:#1f8a70;
+        --danger:#d9534f;
+    }
+
+    body {
+        font-family: 'Poppins', sans-serif;
+        background: linear-gradient(90deg, #ffffff, #ffffff);
+        color: #222;
+        margin: 0;
+        padding: 0;
+    }
+
+    header {
+        background: linear-gradient(90deg, #b46ff1, #ff4ca8);
+        color: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 25px;
+    }
+
+    header .logo img {
+        height: 36px;
+    }
+
+    nav a {
+        margin-right: 16px;
+        text-decoration: none;
+        color: #fff;
+        font-weight: 500;
+    }
+
+    main {
+        padding: 20px;
+        max-width: 1200px;
+        margin: 18px auto;
+    }
+
+    h1 {
+        font-size: 24px;
+        margin-bottom: 20px;
+    }
+
+    .user-table {
+        background: var(--card);
+        padding: 16px;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,.04);
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    th, td {
+        padding: 12px 16px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+
+    th {
+        background: #f4f2f9;
+        color: #444;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .btn {
+        padding: 8px 10px;
+        border-radius: 6px;
+        background: #f1f5f6;
+        border: 1px solid #e6eaec;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .btn:hover {
+        background: #e7ebee;
+    }
+
+    .btn.danger {
+        background: var(--danger);
+        color: #fff;
+        border: none;
+    }
+
+    .btn.danger:disabled {
+        background: #bbb;
+        cursor: not-allowed;
+    }
+
+    .notif {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: var(--accent);
+        color: white;
+        padding: 12px 18px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+        z-index: 100;
+    }
+
+    .notif.show {
+        opacity: 1;
+        pointer-events: all;
+    }
+
+    .search-bar {
+        margin-bottom: 15px;
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .search-bar input {
+        padding: 8px 12px;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        font-size: 14px;
+    }
