@@ -1,6 +1,17 @@
 <?php
 require_once 'connection.php';
+session_start();
 
+// Verif que seul les PO peuvent se login
+if (!isset($_SESSION['user'])) {
+    header("Location: login.php");
+    exit();
+}
+
+if ($_SESSION['user']['Profil'] !== 'product_owner') {
+    header("Location: unauthorized.php"); 
+    exit();
+}
 
 $soldeGlobal  = 0;
 $totalImpaye  = 0.0;
