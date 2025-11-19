@@ -13,7 +13,6 @@
         </div>
         <nav>
             <a href="#">à propos</a>
-            <a href="login.html">Se connecter</a>
         </nav>
     </header>
 
@@ -24,9 +23,16 @@
 
         <div class="form-container">
             <h1>Bienvenue</h1>
-            <form method="POST" action="../Controlleurs/user_controlleur.php">
+            <form method="POST" action="/QualiteDeDevBUT2/Controllers/user_controller.php">
                 <label for="identifiant">Identifiant :</label>
                 <input type="text" id="identifiant" name="Nom" required>
+
+                <label for="profil">Profil :</label>
+                <select id="profil" name="profil">
+                    <option value="client">Client</option>
+                    <option value="admin">Admin</option>
+                    <option value="product_owner">Product Owner</option>
+                </select required>
 
                 <label for="password">Mot de passe :</label>
                 <input type="password" id="password" name="password" required>

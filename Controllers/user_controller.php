@@ -1,6 +1,10 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 session_start();
-require_once __DIR__ . '/../models/user_models.php';
+require_once __DIR__ . '/../Models/user_models.php';
 
 class UtilisateurController {
     private $user_model;
@@ -17,54 +21,78 @@ class UtilisateurController {
             $user = $this->user_model->getUserByUsername($nom);
             if ($user && password_verify($password, $user['Mot_de_passe'])) {
                 $_SESSION['Nom'] = $nom;
+                $_SESSION['Profil'] = $user['Profil'];
                 $_SESSION['id_Utilisateur']  = $user['id_Utilisateur'];
-                header("Location: ../views/images_views.php");
+                $this->redirect();
                 exit;
             } else {
                 $message = "Incorrect username or password.";
-                include __DIR__ . '/../Views/login.html';
+                header("Location: /QualiteDeDevBUT2/Views/login.php");
             }
         } else {
-            include __DIR__ . '/../Views/login.html';
+            header("Location: /QualiteDeDevBUT2/Views/login.php");
+        }
+    }
+
+    public function redirect() {
+        if (!isset($_SESSION["Profil"])) {
+            header("Location: /QualiteDeDevBUT2/Views/login.php");
+            exit;
+        }
+        // Redirection selon le profil
+        switch ($_SESSION["Profil"]) {
+            case 'client':
+                header("Location: /QualiteDeDevBUT2/Views/dashboard.php");
+                exit;
+            case 'admin':
+                header("Location: /QualiteDeDevBUT2/Views/dashboard_admin.php");
+                exit;
+            case 'product_owner':
+                header("Location: /QualiteDeDevBUT2/Views/dashboard_po.php");
+                exit;
+            default:
+                header("Location: /QualiteDeDevBUT2/Views/login.php");
+                exit;
         }
     }
 
     // inscription
     public function register() {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['Nom'], $_POST['password'], $_POST['password_confirm'])) {     
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['Nom'], $_POST['password'], $_POST['password_confirm'], $_POST['profil'])) {     
             $nom = trim($_POST['Nom']);
+            $profil = $_POST['profil'];
             $password = $_POST['password'];
             $password_confirm = $_POST['password_confirm'];
             // valide le mot de passe
             $passwordPattern = '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/';
             if (!preg_match($passwordPattern, $password)) {
                 $message = "Le mot de passe doit contenir au moins 8 caracteres, dont une majuscule, une minuscule, un chiffre et un caractere speciale.";
-                include __DIR__ . '/../Views/register.html';
+                header("Location: /QualiteDeDevBUT2/Views/register.php");
                 return;
             }
             // vérification de la confirmation
             if ($password !== $password_confirm) {
                 $message = "Les mots de passe ne correspondent pas.";
-                include __DIR__ . '/../Views/register.html';
+                header("Location: /QualiteDeDevBUT2/Views/register.php");
                 return;
             }
             // essayez d'ajouter l'utilisateur
-            $result = $this->user_model->addUser($nom, $password, "client");
+            $result = $this->user_model->addUser($nom, $password, $profil);
             if ($result === true) {
                 $user = $this->user_model->getUserByUsername($nom);
-                header("Location: ../Views/login.html");
+                header("Location: ../Views/dashboard_po.php");
                 exit;
             } elseif ($result === "duplicate") {
                 $_SESSION['register_message'] = "Ce nom d'utilisateur ou l'adresse email existe deja. Veuillez en choisir un autre.";
-                header("Location: ../Views/register.html");
+                header("Location: ../Views/register.php");
                 exit;
             } else {
                 $_SESSION['register_message'] = "L'inscription a echouer, veuillez ressayer.";
-                header("Location: ../Views/register.html");
+                header("Location: ../Views/register.php");
                 exit;
             }
         } else {
-            header("Location: ../Views/register.html");
+            header("Location: ../Views/register.php");
             exit;
         }
     }
@@ -79,25 +107,21 @@ class UtilisateurController {
                 $this->user_model->setPassword($_SESSION['user_id'], $password);
                 $message = "Le mot de passe est mis à jour avec succès.";
                 $this->logout();
-                include __DIR__ . '/../Views/login.php';
+                header("Location: /QualiteDeDevBUT2/Views/login.php");
             } else {
                 $message = "Les mots de passe ne correspondent pas.";
-                include __DIR__ . '/../Views/reset_password.php';
+                header("Location: /QualiteDeDevBUT2/Views/reset_password.php");
             }
         } else {
-            include __DIR__ . '/../Views/reset_password.php';
+            header("Location: /QualiteDeDevBUT2/Views/reset_password.php");
         }
     }
-
-    public function resetPassword() {
-        // ..
-    }
-
+    
     // deconnexion
     public function logout() {
         session_unset();
         session_destroy();
-        header("Location: ../Views/Acceuil.html");
+        header("Location: ../Views/login.php");
         exit;
     }
 }

@@ -13,7 +13,6 @@
     </div>
     <nav>
       <a href="#">à propos</a>
-      <a href="register.html">S'inscrire</a>
     </nav>
   </header>
 
@@ -23,7 +22,7 @@
     </div>
 
     <div class="login-section">
-      <form class="login-box" method="POST">
+      <form class="login-box" method="POST" action="../Controllers/user_controller.php">
         <h1>Bonjour</h1>
         <label for="identifiant">Identifiant :</label>
         <input type="text" id="identifiant" name="Nom" required>

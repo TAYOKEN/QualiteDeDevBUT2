@@ -1,3 +1,13 @@
+<?php
+session_start();
+// Vérifie si l'utilisateur n'est pas connecté ou n'est pas product_owner
+if (!isset($_SESSION["Profil"]) || $_SESSION["Profil"] != "product_owner") {
+    header("Location: login.php");
+    exit;
+}
+
+?>
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -22,9 +32,10 @@
             <img src="logo.png" alt="logo">
         </div>
         <nav>
-            <a href="#">Déconnecter</a>
+            <a href="/QualiteDeDevBUT2/Controllers/user_controller.php?action=logout">Déconnecter</a>
             <a href="#">à propos</a>
             <div class="menu">☰</div>
+            <a href="register.php">Ajouter un utilisateur</a>
         </nav>
     </header>
 

@@ -1,3 +1,13 @@
+<?php
+session_start();
+// Vérifie si l'utilisateur n'est pas connecté ou n'est pas admin
+if (!isset($_SESSION["Profil"]) || $_SESSION["Profil"] != "admin") {
+    header("Location: login.php");
+    exit;
+}
+
+?>
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -14,6 +24,7 @@
         <img src="" alt="logo">
     </div>
     <nav>
+        <a href="/QualiteDeDevBUT2/Controllers/user_controller.php?action=logout">Déconnecter</a>
         <a href="#">Tableau de bord</a>
         <a href="#">Admin</a>
     </nav>

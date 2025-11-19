@@ -12,7 +12,7 @@ class UtilisateurModel {
 
     // récupère l'utilisateur par son nom
     public function getUserByUsername($nom) {
-        $request = mysqli_prepare($this->conn, "SELECT id_Utilisateur, Mot_de_passe FROM utilisateur WHERE Nom = ?");
+        $request = mysqli_prepare($this->conn, "SELECT id_Utilisateur, Mot_de_passe, Profil FROM Utilisateur WHERE Nom = ?");
         mysqli_stmt_bind_param($request, "s", $nom);
         mysqli_stmt_execute($request);
         $res = mysqli_stmt_get_result($request);
@@ -21,7 +21,7 @@ class UtilisateurModel {
 
     // récupère l'utilisateur par son id
     public function getUsernameById($id_user) {
-        $request = mysqli_prepare($this->conn, "SELECT * FROM utilisateur WHERE id_Utilisateur = ?");
+        $request = mysqli_prepare($this->conn, "SELECT * FROM Utilisateur WHERE id_Utilisateur = ?");
         mysqli_stmt_bind_param($request, "i", $id_user);
         mysqli_stmt_execute($request);
         $res = mysqli_stmt_get_result($request);
@@ -31,23 +31,23 @@ class UtilisateurModel {
     // ajoute un nouvel utilisateur
     public function addUser($nom, $mdp, $profil) {
         $mdp_secure = password_hash($mdp, PASSWORD_DEFAULT);
-        $request = mysqli_prepare($this->conn, "INSERT INTO utilisateur (Nom, Mot_de_passe, Profil) VALUES (?, ?, ?)"); 
-        mysqli_stmt_bind_param($request, "sss", $nom, $mdp_secure, $profil);
-        try {
-            return mysqli_stmt_execute($request);
-        } catch (mysqli_sql_exception $e) {
-            // Gère les erreurs de duplication
-            if (strpos($e->getMessage(), 'Duplicate entry') !== false) {
-                return "duplicate";
-            }
-            return false;
+        $request = mysqli_prepare($this->conn, "INSERT INTO Utilisateur (Nom, Mot_de_passe, Profil) VALUES (?, ?, ?)"); 
+        if (!$request) {
+            die("Erreur préparation SQL : " . mysqli_error($this->conn));
         }
+        mysqli_stmt_bind_param($request, "sss", $nom, $mdp_secure, $profil);
+        $result = mysqli_stmt_execute($request);
+        if (!$result) {
+            die("Erreur execution requête : " . mysqli_stmt_error($request));
+        }
+        return $result;
     }
+
 
     // met à jour le mot de passe d'un utilisateur
     public function setPassword($id_user, $password) {
         $hashed = password_hash($password, PASSWORD_DEFAULT);
-        $request = mysqli_prepare($this->conn, "UPDATE utilisateur SET Mot_de_passe = ? WHERE id_Utilisateur = ?");
+        $request = mysqli_prepare($this->conn, "UPDATE Utilisateur SET Mot_de_passe = ? WHERE id_Utilisateur = ?");
         mysqli_stmt_bind_param($request, "si", $hashed, $id_user);
         return mysqli_stmt_execute($request);
     }

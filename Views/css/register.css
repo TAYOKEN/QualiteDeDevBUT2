@@ -84,7 +84,8 @@ label {
 
 input[type="text"],
 input[type="email"],
-input[type="password"] {
+input[type="password"],
+select.profil {
     width: 100%;
     padding: 8px;
     margin-top: 5px;
