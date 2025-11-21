@@ -5,7 +5,9 @@ if (!isset($_SESSION["Profil"]) || $_SESSION["Profil"] != "product_owner") {
     header("Location: login.php");
     exit;
 }
-
+require_once __DIR__ . '/../Models/remise_models.php';
+$model = new RemiseModel();
+$transactions= $model->getAllTransactionsWithStatus();
 ?>
 
 <!DOCTYPE html>
@@ -42,13 +44,13 @@ if (!isset($_SESSION["Profil"]) || $_SESSION["Profil"] != "product_owner") {
     <main>
         <section class="infos">
             <div class="client-card">
-                <p><strong>Mr. Boukayouh Yanis</strong><br>PO</p>
+                <p><strong><?php echo htmlspecialchars($_SESSION["Nom"]); ?></strong><br>PO</p>
                 <p class="small">Portail de gestion de paiement - démonstration</p>
             </div>
 
             <div class="solde-card">
                 <p>Solde Global :</p>
-                <h1 id="solde-global" class="solde">+15 500$</h1>
+                <h1 id="solde-global" class="solde"></h1>
                 <p class="small" id="total-neg-display"></p>
             </div>
 
@@ -109,68 +111,28 @@ if (!isset($_SESSION["Profil"]) || $_SESSION["Profil"] != "product_owner") {
                         <th data-type="date">Date : <span class="arrow">↓</span></th>
                         <th data-type="text">Nom : <span class="arrow">↓</span></th>
                         <th data-type="text">N° Siret : <span class="arrow">↓</span></th>
-                        <th data-type="number">Impayés : <span class="arrow">↓</span></th>
+                        <th data-type="number">Montant : <span class="arrow">↓</span></th>
                         <th>Accéder compte :</th>
                         <th>Voir plus :</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <!-- Chaque tr.data-row contient maintenant des attributs data-impayes et data-remises (JSON encode) pour la sidebar -->
-                    <tr class="data-row" data-impayes='[{"date":"01/09/24","date_limite":"01/10/24","libelle":"Facture A","montant":1000},{"date":"05/09/24","date_limite":"05/11/24","libelle":"Facture B","montant":500}]' data-remises='[{"date":"02/09/24","date_limite":"-","libelle":"Remise 1","montant":200},{"date":"08/09/24","date_limite":"-","libelle":"Remise 2","montant":300}]'>
-                        <td>01/09/24</td>
-                        <td>Yehven Kefa</td>
-                        <td>784 671 695 00103</td>
-                        <td class="negatif">-1500 $</td>
+                 <tbody>
+                    <?php
+                    foreach ($transactions as $t):
+                        $classe = $t['estImpaye'] ? 'negatif' : 'positif';
+                    ?>
+                    <tr class="data-row" 
+                        data-impayes='<?= json_encode($t['estImpaye'] ? [$t] : []) ?>' 
+                        data-remises='<?= json_encode([]) ?>'>
+                        <td><?= date('d/m/Y', strtotime($t['Date_Transaction'])) ?></td>
+                        <td><?= htmlspecialchars($t['Nom_Utilisateur']) ?></td>
+                        <td><?= htmlspecialchars($t['Siret_Client']) ?></td>
+                        <td class="<?= $classe ?>"><?= $t['estImpaye'] ? number_format($t['Montant'] ?? 0, 2) . ' $' : number_format(0, 2) . ' $' ?></td>
                         <td><button class="btn-acceder btn">⚙️ Accéder</button></td>
                         <td><button class="btn-voir btn">👁️ Voir Plus</button></td>
                     </tr>
-
-                    <tr class="data-row" data-impayes='[{"date":"10/09/24","date_limite":"10/10/24","libelle":"Facture C","montant":1500}]' data-remises='[{"date":"11/09/24","date_limite":"-","libelle":"Remise 3","montant":0}]'>
-                        <td>10/09/24</td>
-                        <td>Thomas Noël</td>
-                        <td>784 671 678 04403</td>
-                        <td class="negatif">-1500 $</td>
-                        <td><button class="btn-acceder btn">⚙️ Accéder</button></td>
-                        <td><button class="btn-voir btn">👁️ Voir Plus</button></td>
-                    </tr>
-
-                    <tr class="data-row" data-impayes='[{"date":"15/09/24","date_limite":"15/10/24","libelle":"Facture D","montant":2000}]' data-remises='[{"date":"16/09/24","date_limite":"-","libelle":"Remise 4","montant":0}]'>
-                        <td>15/09/24</td>
-                        <td>Yanis Boukayouh</td>
-                        <td>784 671 695 00103</td>
-                        <td class="negatif">-2000 $</td>
-                        <td><button class="btn-acceder btn">⚙️ Accéder</button></td>
-                        <td><button class="btn-voir btn">👁️ Voir Plus</button></td>
-                    </tr>
-
-                    <tr class="data-row" data-impayes='[]' data-remises='[{"date":"20/09/24","date_limite":"-","libelle":"Remise 5","montant":0}]'>
-                        <td>20/09/24</td>
-                        <td>Rayan Essaidi</td>
-                        <td>784 671 695 08423</td>
-                        <td class="positif">0</td>
-                        <td><button class="btn-acceder btn">⚙️ Accéder</button></td>
-                        <td><button class="btn-voir btn">👁️ Voir Plus</button></td>
-                    </tr>
-
-                    <tr class="data-row" data-impayes='[{"date":"01/08/24","date_limite":"01/09/24","libelle":"Facture E","montant":2000}]' data-remises='[]'>
-                        <td>01/08/24</td>
-                        <td>Hamza Revel</td>
-                        <td>784 671 695 00103</td>
-                        <td class="negatif">-2000 $</td>
-                        <td><button class="btn-acceder btn">⚙️ Accéder</button></td>
-                        <td><button class="btn-voir btn">👁️ Voir Plus</button></td>
-                    </tr>
-
-                    <tr class="data-row" data-impayes='[]' data-remises='[]'>
-                        <td>25/09/24</td>
-                        <td>John Pork</td>
-                        <td>784 671 695 00104</td>
-                        <td class="positif">0</td>
-                        <td><button class="btn-acceder btn">⚙️ Accéder</button></td>
-                        <td><button class="btn-voir btn">👁️ Voir Plus</button></td>
-                    </tr>
-                </tbody>
-
+                    <?php endforeach; ?>
+                    </tbody>
                 <tfoot>
                     <tr>
                         <td colspan="5" class="totals">Total (visible) : <span id="visible-total">0 $</span></td>

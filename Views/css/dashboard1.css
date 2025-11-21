@@ -1,11 +1,11 @@
         :root{--bg:#f5f7fb;--card:#fff;--accent:#1f8a70;--danger:#d9534f;}
-    body {
-        font-family: 'Poppins', sans-serif;
-        background: linear-gradient(90deg, #ffffff, #ffffff);
-        color: #222;
-        margin: 0;
-        padding: 0;
-        }
+body {
+    font-family: 'Poppins', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    margin: 0;
+    padding: 0;
+}
 
         header {
             background: linear-gradient(90deg, #b46ff1, #ff4ca8);
@@ -62,3 +62,41 @@
         .topbar-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
         .result-count{font-size:14px;margin-left:6px}
         .small{font-size:13px;color:#666}
+        /* Ligne détaillée visible lors du toggle */
+tr.detail-row {
+    display: none;
+    background: #fbfbfb;
+}
+
+tr.detail-row td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #ddd;
+}
+
+.row-toggle {
+    cursor: pointer;
+    text-align: center;
+    font-weight: bold;
+}
+
+/* Montants positifs / négatifs */
+.positif {
+    color: green;
+    font-weight: 500;
+}
+
+.negatif {
+    color: var(--danger);
+    font-weight: 500;
+}
+
+/* Table interne pour transactions détaillées */
+.inner-transactions {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.inner-transactions td {
+    padding: 6px;
+    border: 1px solid #ccc;
+}

@@ -38,3 +38,6 @@
 
         /* compact responsive */
         @media (max-width:900px){ .infos{grid-template-columns:1fr;}}   
+
+        .negatif { color: red; }
+        .positif { color: green; }

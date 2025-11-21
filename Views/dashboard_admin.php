@@ -6,7 +6,10 @@ if (!isset($_SESSION["Profil"]) || $_SESSION["Profil"] != "admin") {
     exit;
 }
 
-?>
+require_once __DIR__ . '/../Models/user_models.php';
+$model = new UtilisateurModel();
+$user = $model->getAllUser($_SESSION["id_Utilisateur"]); 
+?>  
 
 <!DOCTYPE html>
 <html lang="fr">
@@ -32,7 +35,7 @@ if (!isset($_SESSION["Profil"]) || $_SESSION["Profil"] != "admin") {
 
 <main>
     <h1>Gestion des comptes utilisateurs</h1>
-
+     <p><strong><?php echo htmlspecialchars($_SESSION["Nom"]); ?></strong><br>Admin</p>
     <div class="user-table">
         <div class="search-bar">
             <input type="text" id="searchInput" placeholder="🔍 Rechercher un utilisateur...">
@@ -42,47 +45,26 @@ if (!isset($_SESSION["Profil"]) || $_SESSION["Profil"] != "admin") {
             <thead>
                 <tr>
                     <th>Nom d'utilisateur</th>
-                    <th>Email</th>
                     <th>Rôle</th>
-                    <th>Date d'inscription</th>
                     <th>Action</th>
                 </tr>
             </thead>
             <tbody>
+            <?php foreach ($user as $u): ?>
                 <tr>
-                    <td>Yanis</td>
-                    <td>yanis@example.com</td>
-                    <td>Admin</td>
-                    <td>2025-01-10</td>
-                    <td><button class="btn danger">Demander suppression</button></td>
+                    <td><?= htmlspecialchars($u['Nom']) ?></td>
+                    <td><?= htmlspecialchars($u['Profil']) ?></td>
+                    <td>
+                        <button class="btn danger">Demander suppression</button>
+                    </td>
                 </tr>
-                <tr>
-                    <td>Emma</td>
-                    <td>emma@mail.com</td>
-                    <td>Utilisateur</td>
-                    <td>2025-02-20</td>
-                    <td><button class="btn danger">Demander suppression</button></td>
-                </tr>
-                <tr>
-                    <td>Lucas</td>
-                    <td>lucas@gmail.com</td>
-                    <td>Utilisateur</td>
-                    <td>2025-03-05</td>
-                    <td><button class="btn danger">Demander suppression</button></td>
-                </tr>
-                <tr>
-                    <td>Sofia</td>
-                    <td>sofia@site.com</td>
-                    <td>Utilisateur</td>
-                    <td>2025-04-12</td>
-                    <td><button class="btn danger">Demander suppression</button></td>
-                </tr>
-            </tbody>
+            <?php endforeach; ?>
+        </tbody>
         </table>
     </div>
 </main>
 
-<div class="notif" id="notif">✅ Demande de suppression envoyée</div>
+<div class="notif" id="notif">Demande de suppression envoyée</div>
     <script src="js/dashboard3.js"></script>
 
 

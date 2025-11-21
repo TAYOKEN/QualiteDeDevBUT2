@@ -1,156 +1,196 @@
 <?php
 session_start();
-// Vérifie si l'utilisateur n'est pas connecté ou n'est pas product_owner
+
 if (!isset($_SESSION["Profil"]) || $_SESSION["Profil"] != "client") {
     header("Location: login.php");
     exit;
 }
 
+require_once __DIR__ . '/../Controllers/remise_controller.php';
+$remiseController = new RemiseController();
+$remisesData = $remiseController->getRemisesStructure();
+$soldeTotal = $remiseController->getSoldeGlobalClient();
 ?>
 
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Tableau de bord - Trésorerie</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Tableau de bord - Trésorerie</title>
 
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- jsPDF pour export PDF -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-
-    <!-- SheetJS pour export XLS (simple) -->
-    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
-    <link rel="stylesheet" href="css/dashboard1.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+<link rel="stylesheet" href="css/dashboard1.css">
+<style>
+.detail-row { display: none; }
+.row-toggle { cursor: pointer; }
+.positif { color: green; }
+.negatif { color: red; }
+.inner-transactions { width: 100%; border-collapse: collapse; }
+.inner-transactions td { padding: 4px; border: 1px solid #ccc; }
+</style>
 </head>
 <body>
-    <header>
-        <div class="logo">
-            <img src="logo.png" alt="logo">
-        </div>
-        <nav>
-            <a href="/QualiteDeDevBUT2/Controllers/user_controller.php?action=logout">Déconnecter</a>
-            <a href="#">à propos</a>
-            <div class="menu">☰</div>
-        </nav>
-    </header>
+<header>
+<div class="logo"><img src="logo.png" alt="logo"></div>
+<nav>
+<a href="/QualiteDeDevBUT2/Controllers/user_controller.php?action=logout">Déconnecter</a>
+<a href="#">à propos</a>
+<div class="menu">☰</div>
+</nav>
+</header>
 
-    <main>
-        <section class="infos">
-            <div class="client-card">
-                <p><strong>Mr. Boukayouh Yanis</strong><br>Client</p>
-                <p class="small">Portail de gestion de paiement - démonstration</p>
-            </div>
+<main>
+<section class="infos">
+<div class="client-card">
+<p><strong>Client connecté :</strong> <?php echo htmlspecialchars($_SESSION['Nom']); ?></p>
+<p class="small">Portail de gestion de paiement - démonstration</p>
+</div>
 
-            <div class="solde-card">
-                <p>Solde Global :</p>
-                <h1 id="solde-global" class="solde">+15 500$</h1>
-                <p class="small" id="total-neg-display"></p>
-            </div>
+<div class="solde-card">
+    <p>Solde Global :</p>
+    <h1 class="<?php echo ($soldeTotal < 0) ? 'negatif' : 'positif'; ?>">
+        <?php 
+        $soldeTotal = (float)$soldeTotal;
+        echo ($soldeTotal >= 0 ? '+' : '-') . number_format(abs($soldeTotal), 2) . '$'; 
+        ?>
+    </h1>
+</div>
 
-            <div class="chart-card">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-                    <div>
-                        <strong>Évolution de la trésorerie</strong>
-                    </div>
-                    <div style="display:flex;gap:8px;align-items:center">
-                        <label class="small">Type :</label>
-                        <select id="chartTypeSelect" class="btn">
-                            <option value="line">Courbe</option>
-                            <option value="bar">Histogramme</option>
-                        </select>
-                    </div>
-                </div>
-                <canvas id="graphique" style="max-height:220px"></canvas>
-            </div>
-        </section>
+<div class="chart-card">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+<div><strong>Évolution de la trésorerie</strong></div>
+<div style="display:flex;gap:8px;align-items:center">
+<label class="small">Type :</label>
+<select id="chartTypeSelect" class="btn">
+<option value="line">Courbe</option>
+<option value="bar">Histogramme</option>
+</select>
+</div>
+</div>
+<canvas id="graphique" style="max-height:220px"></canvas>
+</div>
+</section>
 
-        <section class="transactions">
-            <div class="controls">
-                <div class="topbar-actions">
-                    <button class="btn" id="export-csv">Export CSV</button>
-                    <button class="btn" id="export-xls">Export XLS</button>
-                    <button class="btn" id="export-pdf">Export PDF</button>
-                </div>
+<section class="transactions">
+<div class="controls">
+<div class="topbar-actions">
+<button class="btn" id="export-csv">Export CSV</button>
+<button class="btn" id="export-xls">Export XLS</button>
+<button class="btn" id="export-pdf">Export PDF</button>
+</div>
 
-                <div style="margin-left:auto; display:flex; gap:8px; align-items:center">
-                    <label for="search" class="small">Recherche :</label>
-                    <input id="search" placeholder="Rechercher (SIREN, intitulé, date, remise...)" />
-                    <label class="small">Lignes :</label>
-                    <select id="perPage" class="btn">
-                        <option>5</option>
-                        <option selected>10</option>
-                        <option>25</option>
-                        <option>50</option>
-                    </select>
-                </div>
-            </div>
+<div style="margin-left:auto; display:flex; gap:8px; align-items:center">
+<label for="search" class="small">Recherche :</label>
+<input id="search" placeholder="Rechercher (SIREN, intitulé, date, remise...)" />
+<label class="small">Lignes :</label>
+<select id="perPage" class="btn">
+<option>5</option>
+<option selected>10</option>
+<option>25</option>
+<option>50</option>
+</select>
+</div>
+</div>
 
-            <div style="display:flex;align-items:center;margin-bottom:8px">
-                <div><strong id="result-count">10 résultats</strong></div>
-                <div class="result-count" id="total-remises"></div>
-            </div>
+<table id="table-transactions" aria-describedby="result-count">
+<thead>
+<tr>
+<th>Numéro Remise</th>
+<th>Date de vente</th>
+<th>Montant total</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<?php foreach($remisesData as $remise): 
+    $transactions = $remise['transactions'];
+    $totalRemise = 0;
 
-            <table id="table-transactions" aria-describedby="result-count">
-                <thead>
-                    <tr>
-                        <th data-type="date">Date <span class="arrow">↓</span></th>
-                        <th data-type="text">Intitulé <span class="arrow">↓</span></th>
-                        <th data-type="text">N° Siret <span class="arrow">↓</span></th>
-                        <th data-type="number">Montant <span class="arrow">↓</span></th>
-                        <th> </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Chaque ligne principale est suivie d'une ligne detail-row (cachée) pour les détails -->
-                    <tr class="data-row"><td>05/10/25</td><td>Achat de stock de chaussures Nike</td><td>784 671 695 00103</td><td class="negatif">-1000$</td><td class="row-toggle">➕</td></tr>
-                    <tr class="detail-row"><td colspan="5">Fournisseur: Nike France — Mode de paiement: Carte — Référence remise: REM-001 — Remarques: livraison OK</td></tr>
+    // Calcul du total de la remise (somme de toutes les transactions)
+    foreach($transactions as $tr) {
+        $sens = $tr['transaction']['Sens'];
+        $montant = $tr['transaction']['Montant'] ?? 0;
+        $totalRemise += ($sens === '+') ? $montant : -$montant;
+    }
 
-                    <tr class="data-row"><td>05/10/25</td><td>Achat de T-shirt blanc</td><td>784 671 678 04403</td><td class="negatif">-1500$</td><td class="row-toggle">➕</td></tr>
-                    <tr class="detail-row"><td colspan="5">Fournisseur: Atelier Textile — Mode: Carte — Référence: REM-002</td></tr>
+    // Classe pour couleur du total de la remise
+    $classTotal = ($totalRemise < 0) ? 'negatif' : 'positif';
+?>
+<tr class="remise-row">
+    <td><?php echo htmlspecialchars($remise['remise']['Num_remise'] ?? ''); ?></td>
+    <td><?php echo date("d/m/Y", strtotime($remise['remise']['Date_vente'])); ?></td>
+    <td class="<?php echo $classTotal; ?>">
+        <?php echo number_format($totalRemise, 2); ?>$
+    </td>
+    <td class="row-toggle">➕</td>
+</tr>
 
-                    <tr class="data-row"><td>05/10/25</td><td>Achat de Polo</td><td>784 671 695 00103</td><td class="negatif">-2000$</td><td class="row-toggle">➕</td></tr>
-                    <tr class="detail-row"><td colspan="5">Détails: Polo coupe classique, fournisseur: PoloCo</td></tr>
+<?php foreach($transactions as $tr): 
+    $sens = $tr['transaction']['Sens'];
+    $montant = $tr['transaction']['Montant'] ?? 0;
+    $impaye = $tr['impaye'];
 
-                    <tr class="data-row"><td>15/09/25</td><td>Vente de stock de T-shirt</td><td>784 671 695 08423</td><td class="positif">+10000$</td><td class="row-toggle">➕</td></tr>
-                    <tr class="detail-row"><td colspan="5">Client: Vente en gros — Référence: REM-010</td></tr>
+    // Si impayé => rouge, sinon vert
+    $classMontant = $impaye ? 'negatif' : 'positif';
+    $montantAffiche = ($sens == '+') ? '+' . number_format($montant,2) : '-' . number_format($montant,2);
+?>
+<tr class="detail-row">
+    <td colspan="4" class="inner-container">
+        <table class="inner-transactions">
+            <thead>
+                <tr>
+                    <th>Libellé</th>
+                    <th>Num Carte</th>
+                    <th>Montant</th>
+                    <th>Statut</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach($transactions as $tr): 
+                    $sens = $tr['transaction']['Sens'];
+                    $montant = $tr['transaction']['Montant'] ?? 0;
+                    $impaye = $tr['impaye'];
+                    $classMontant = $impaye ? 'negatif' : 'positif';
+                    $montantAffiche = ($sens == '+') ? '+' . number_format($montant,2) : '-' . number_format($montant,2);
+                ?>
+                <tr>
+                    <td><?php echo htmlspecialchars($tr['transaction']['Libelle']); ?></td>
+                    <td><?php echo htmlspecialchars($tr['transaction']['Num_Carte']); ?></td>
+                    <td class="<?php echo $classMontant; ?>"><?php echo $montantAffiche; ?>$</td>
+                    <td><?php echo $impaye ? "IMPAYÉ - Dossier: ".$impaye['Num_dossier'] : "Transaction normale"; ?></td>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </td>
+</tr>
 
-                    <tr class="data-row"><td>09/09/25</td><td>Achat de stock de fumo Cirno</td><td>784 671 695 00103</td><td class="negatif">-2000$</td><td class="row-toggle">➕</td></tr>
-                    <tr class="detail-row"><td colspan="5">Produit: Fumo Cirno — Quantité: 50 — Référence: REM-011</td></tr>
+<?php endforeach; ?>
+<?php endforeach; ?>
+</tbody>
+</table>
+</section>
+</main>
 
-                    <tr class="data-row"><td>20/08/25</td><td>Vente de baskets Adidas</td><td>784 671 645 09876</td><td class="positif">+3000$</td><td class="row-toggle">➕</td></tr>
-                    <tr class="detail-row"><td colspan="5">Vente magasin — Référence: REM-020</td></tr>
-
-                    <tr class="data-row"><td>10/08/25</td><td>Achat de jeans Levi’s</td><td>784 671 610 77890</td><td class="negatif">-2500$</td><td class="row-toggle">➕</td></tr>
-                    <tr class="detail-row"><td colspan="5">Fournisseur: Levi's — Réf: REM-030</td></tr>
-
-                    <tr class="data-row"><td>01/07/25</td><td>Vente de chemises</td><td>784 671 600 11223</td><td class="positif">+4000$</td><td class="row-toggle">➕</td></tr>
-                    <tr class="detail-row"><td colspan="5">Vente marché — Réf: REM-040</td></tr>
-
-                    <tr class="data-row"><td>15/06/25</td><td>Achat de pulls H&M</td><td>784 671 622 44556</td><td class="negatif">-1800$</td><td class="row-toggle">➕</td></tr>
-                    <tr class="detail-row"><td colspan="5">Fournisseur: H&M — Réf: REM-050</td></tr>
-
-                    <tr class="data-row"><td>05/05/25</td><td>Vente de manteaux Zara</td><td>784 671 677 77889</td><td class="positif">+6000$</td><td class="row-toggle">➕</td></tr>
-                    <tr class="detail-row"><td colspan="5">Grossiste: Zara France — Réf: REM-060</td></tr>
-                </tbody>
-                <tfoot>
-                    <tr>
-                        <td colspan="5" class="totals">Total (visible) : <span id="visible-total">0 $</span></td>
-                    </tr>
-                </tfoot>
-            </table>
-
-            <div class="pager">
-                <div class="pagination" id="pagination"></div>
-                <div>
-                    <button class="btn" id="prevPage">Préc</button>
-                    <button class="btn" id="nextPage">Suiv</button>
-                </div>
-            </div>
-        </section>
-    </main>
-    <script src="js/dashboard1.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    document.querySelectorAll(".row-toggle").forEach(function(btn){
+        btn.addEventListener("click", function(){
+            let tr = this.closest("tr");
+            let next = tr.nextElementSibling;
+            while(next && next.classList.contains("detail-row")) {
+                next.style.display = (next.style.display === "table-row") ? "none" : "table-row";
+                next = next.nextElementSibling;
+            }
+            this.textContent = (this.textContent === "➕") ? "➖" : "➕";
+        });
+    });
+});
+</script>
+<script src="js/dashboard1.js"></script>
 </body>
 </html>
