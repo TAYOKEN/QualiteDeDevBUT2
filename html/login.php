@@ -42,11 +42,18 @@
         .warning { background:#ffdd99; padding:10px; border-left:5px solid orange; margin-bottom:10px; }
         .password-wrapper { position:relative; }
         #togglePassword {
-            position:absolute;
-            right:10px;
-            top:50%;
-            transform:translateY(-50%);
-            cursor:pointer;
+            width: 22px;
+            height: 22px;
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            opacity: 0.7;
+            transition: 0.2s ease;
+        }
+        #togglePassword:hover {
+            opacity: 1;
         }
     </style>
 </head>
@@ -73,7 +80,7 @@
             <label for="password">Mot de passe :</label>
             <div class="password-wrapper">
                 <input type="password" id="password" name="password" required>
-                <span id="togglePassword">voir</span>
+                <img id="togglePassword" src="icons/view.png" alt="Afficher mot de passe">
             </div>
             <a href="#">Mot de passe oublié</a>
             <button type="submit">Se connecter</button>
@@ -82,15 +89,22 @@
 </main>
 
 <script>
-// bouton œil
-const togglePassword = document.getElementById("togglePassword");
-const passwordField = document.getElementById("password");
+    const togglePassword = document.getElementById("togglePassword");
+    const passwordField = document.getElementById("password");
+    const eyeOpen = "icons/view.png";
+    const eyeClosed = "icons/hide.png";
 
-togglePassword.addEventListener("click", () => {
-    const type = passwordField.type === "password" ? "text" : "password";
-    passwordField.type = type;
-    togglePassword.textContent = type === "password" ? "voir" : "cacher";
-});
+    togglePassword.addEventListener("click", () => {
+        if (passwordField.type === "password") {
+            passwordField.type = "text";
+            togglePassword.src = eyeClosed;
+            togglePassword.alt = "Cacher le mot de passe";
+        } else {
+            passwordField.type = "password";
+            togglePassword.src = eyeOpen;
+            togglePassword.alt = "Afficher le mot de passe";
+        }
+    });
 </script>
 
 </body>
