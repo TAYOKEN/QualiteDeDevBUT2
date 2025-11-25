@@ -1,9 +1,80 @@
+<?php
+require_once 'connection.php';
+session_start();
+
+// Verif que seul les PO peuvent se login
+if (!isset($_SESSION['user'])) {
+    header("Location: login.php");
+    exit();
+}
+
+if ($_SESSION['user']['Profil'] !== 'product_owner') {
+    header("Location: unauthorized.php"); 
+    exit();
+}
+
+$soldeGlobal  = 0;
+$totalImpaye  = 0.0;
+$transactions = [];
+
+try {
+    $stmtSolde = $pdo->query("SELECT SUM(Solde) AS total_solde FROM Compte");
+    $soldeGlobal = (float) $stmtSolde->fetchColumn();
+// Requete + calcul de somme pour avoir le total impayé
+    $stmtImpaye = $pdo->query("
+        SELECT SUM(t.Montant_Total) AS total_impaye
+        FROM Transactions t
+        INNER JOIN Impaye i ON i.Id_Transactions = t.Id_Transactions
+    ");
+    $totalImpaye = (float) $stmtImpaye->fetchColumn();
+// Requete de recup
+    $stmt = $pdo->query("
+        SELECT 
+            t.Date_Transaction,
+            u.Nom AS nom_client,
+            c.Siren,
+            CASE 
+                WHEN i.Id_Impaye IS NULL THEN 0 
+                ELSE -t.Montant_Total 
+            END AS montant_impaye
+        FROM Transactions t
+        JOIN Client c       ON t.Id_Client = c.Id_Client
+        JOIN Utilisateur u  ON c.Id_Utilisateur = u.Id_Utilisateur
+        LEFT JOIN Impaye i  ON i.Id_Transactions = t.Id_Transactions
+        ORDER BY t.Date_Transaction DESC
+    ");
+    $transactions = $stmt->fetchAll();
+
+} catch (PDOException $e) {
+    die("Erreur SQL : " . $e->getMessage());
+}
+
+
+function formatMontant($m) {
+    if ($m == 0 || $m === null) {
+        return "0 $";
+    }
+    $sign = $m < 0 ? '-' : '+';
+    $val  = number_format(abs($m), 0, ',', ' ');
+    return $sign . $val . " $";
+}
+
+function formatDateFr($dateSql) {
+    if (!$dateSql) return '';
+    try {
+        $d = new DateTime($dateSql);
+        return $d->format('d/m/y');
+    } catch (Exception $e) {
+        return $dateSql;
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Tableau de bord - Trésorerie (avec recherche avancée & sidebar)</title>
+    <title>Tableau de bord - PO</title>
 
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -13,8 +84,7 @@
 
     <!-- SheetJS pour export XLS (simple) -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
-        <link rel="stylesheet" href="css/dashboard2.css">
-
+    <link rel="stylesheet" href="css/dashboard2.css">
 </head>
 <body>
     <header>
@@ -24,7 +94,8 @@
         <nav>
             <a href="#">Déconnecter</a>
             <a href="#">à propos</a>
-            <a href="po_accounts.php">Comptes</a>
+
+            <!-- peut etre supprimer celui la -->
             <div class="menu">☰</div>
         </nav>
     </header>
@@ -38,8 +109,12 @@
 
             <div class="solde-card">
                 <p>Solde Global :</p>
-                <h1 id="solde-global" class="solde">+15 500$</h1>
-                <p class="small" id="total-neg-display"></p>
+                <h1 id="solde-global" class="solde">
+                    <?php echo htmlspecialchars(formatMontant($soldeGlobal)); ?>
+                </h1>
+                <p class="small" id="total-neg-display">
+                    Total impayés : <?php echo htmlspecialchars(formatMontant(-$totalImpaye)); ?>
+                </p>
             </div>
 
             <div class="chart-card">
@@ -72,7 +147,6 @@
                     <label for="search" class="small">Recherche :</label>
                     <input id="search" placeholder="Rechercher (SIREN, intitulé, date, remise...)" />
 
-                    <!-- Recherche approfondie -->
                     <label class="small">Recherche approfondie :</label>
                     <input id="dateStart" type="date" class="btn" title="Date début" />
                     <input id="dateEnd" type="date" class="btn" title="Date fin" />
@@ -89,7 +163,7 @@
             </div>
 
             <div style="display:flex;align-items:center;margin-bottom:8px">
-                <div><strong id="result-count">10 résultats</strong></div>
+                <div><strong id="result-count"><?php echo count($transactions); ?> résultats</strong></div>
                 <div class="result-count" id="total-remises"></div>
             </div>
 
@@ -105,60 +179,29 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- Chaque tr.data-row contient maintenant des attributs data-impayes et data-remises (JSON encode) pour la sidebar -->
-                    <tr class="data-row" data-impayes='[{"date":"01/09/24","date_limite":"01/10/24","libelle":"Facture A","montant":1000},{"date":"05/09/24","date_limite":"05/11/24","libelle":"Facture B","montant":500}]' data-remises='[{"date":"02/09/24","date_limite":"-","libelle":"Remise 1","montant":200},{"date":"08/09/24","date_limite":"-","libelle":"Remise 2","montant":300}]'>
-                        <td>01/09/24</td>
-                        <td>Yehven Kefa</td>
-                        <td>784 671 695 00103</td>
-                        <td class="negatif">-1500 $</td>
-                        <td><button class="btn-acceder btn">⚙️ Accéder</button></td>
-                        <td><button class="btn-voir btn">👁️ Voir Plus</button></td>
-                    </tr>
+                    <?php foreach ($transactions as $row): 
+                        $date   = formatDateFr($row['Date_Transaction']);
+                        $nom    = $row['nom_client'];
+                        $siren  = $row['Siren'];
+                        $montantImpaye = (float) $row['montant_impaye'];
+                        $classMontant  = $montantImpaye < 0 ? 'negatif' : 'positif';
 
-                    <tr class="data-row" data-impayes='[{"date":"10/09/24","date_limite":"10/10/24","libelle":"Facture C","montant":1500}]' data-remises='[{"date":"11/09/24","date_limite":"-","libelle":"Remise 3","montant":0}]'>
-                        <td>10/09/24</td>
-                        <td>Thomas Noël</td>
-                        <td>784 671 678 04403</td>
-                        <td class="negatif">-1500 $</td>
+                        $dataImpayes = '[]';
+                        $dataRemises = '[]';
+                    ?>
+                    <tr class="data-row"
+                        data-impayes='<?php echo $dataImpayes; ?>'
+                        data-remises='<?php echo $dataRemises; ?>'>
+                        <td><?php echo htmlspecialchars($date); ?></td>
+                        <td><?php echo htmlspecialchars($nom); ?></td>
+                        <td><?php echo htmlspecialchars($siren); ?></td>
+                        <td class="<?php echo $classMontant; ?>">
+                            <?php echo htmlspecialchars(formatMontant($montantImpaye)); ?>
+                        </td>
                         <td><button class="btn-acceder btn">⚙️ Accéder</button></td>
                         <td><button class="btn-voir btn">👁️ Voir Plus</button></td>
                     </tr>
-
-                    <tr class="data-row" data-impayes='[{"date":"15/09/24","date_limite":"15/10/24","libelle":"Facture D","montant":2000}]' data-remises='[{"date":"16/09/24","date_limite":"-","libelle":"Remise 4","montant":0}]'>
-                        <td>15/09/24</td>
-                        <td>Yanis Boukayouh</td>
-                        <td>784 671 695 00103</td>
-                        <td class="negatif">-2000 $</td>
-                        <td><button class="btn-acceder btn">⚙️ Accéder</button></td>
-                        <td><button class="btn-voir btn">👁️ Voir Plus</button></td>
-                    </tr>
-
-                    <tr class="data-row" data-impayes='[]' data-remises='[{"date":"20/09/24","date_limite":"-","libelle":"Remise 5","montant":0}]'>
-                        <td>20/09/24</td>
-                        <td>Rayan Essaidi</td>
-                        <td>784 671 695 08423</td>
-                        <td class="positif">0</td>
-                        <td><button class="btn-acceder btn">⚙️ Accéder</button></td>
-                        <td><button class="btn-voir btn">👁️ Voir Plus</button></td>
-                    </tr>
-
-                    <tr class="data-row" data-impayes='[{"date":"01/08/24","date_limite":"01/09/24","libelle":"Facture E","montant":2000}]' data-remises='[]'>
-                        <td>01/08/24</td>
-                        <td>Hamza Revel</td>
-                        <td>784 671 695 00103</td>
-                        <td class="negatif">-2000 $</td>
-                        <td><button class="btn-acceder btn">⚙️ Accéder</button></td>
-                        <td><button class="btn-voir btn">👁️ Voir Plus</button></td>
-                    </tr>
-
-                    <tr class="data-row" data-impayes='[]' data-remises='[]'>
-                        <td>25/09/24</td>
-                        <td>John Pork</td>
-                        <td>784 671 695 00104</td>
-                        <td class="positif">0</td>
-                        <td><button class="btn-acceder btn">⚙️ Accéder</button></td>
-                        <td><button class="btn-voir btn">👁️ Voir Plus</button></td>
-                    </tr>
+                    <?php endforeach; ?>
                 </tbody>
 
                 <tfoot>
@@ -167,7 +210,7 @@
                     </tr>
                 </tfoot>
             </table>
-
+                            <!-- Qui s'occupe d'avoir les requete pour voir tout les impayés ???? -->
             <div class="pager">
                 <div class="pagination" id="pagination"></div>
                 <div>
@@ -179,7 +222,6 @@
         </section>
     </main>
 
-    <!-- SIDEBAR pour "Voir Plus" -->
     <div class="sidebar-backdrop" id="sidebarBackdrop">
         <aside class="sidebar" id="sidebar">
             <div style="display:flex;justify-content:space-between;align-items:center">
@@ -195,45 +237,53 @@
             </div>
 
             <h4>Impayés</h4>
-            <table id="impayesTable"><thead><tr><th>Date</th><th>Date limite</th><th>Libellé</th><th>Montant</th></tr></thead><tbody></tbody></table>
+            <table id="impayesTable">
+                <thead>
+                    <tr><th>Date</th><th>Date limite</th><th>Libellé</th><th>Montant</th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
 
             <h4 style="margin-top:12px">Rémises</h4>
-            <table id="remisesTable"><thead><tr><th>Date</th><th>Date limite</th><th>Libellé</th><th>Montant</th></tr></thead><tbody></tbody></table>
+            <table id="remisesTable">
+                <thead>
+                    <tr><th>Date</th><th>Date limite</th><th>Libellé</th><th>Montant</th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
         </aside>
     </div>
 
-    <script src="js/fetch-data.js"></script>
-    <script src="js/dashboard2.js"></script>
+    <div id="globalRemisesModal" class="modal-backdrop">
+        <div class="modal-window">
+            <h2>Toutes les remises</h2>
+            <button id="close-global-remises">Close</button>
 
+            <table id="globalRemisesTable">
+                <thead>
+                    <tr>
+                        <th>Entreprise</th>
+                        <th>SIRET</th>
+                        <th>Date</th>
+                        <th>Libellé</th>
+                        <th>Montant</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
 
-<div id="globalRemisesModal" class="modal-backdrop" >
-    <div class="modal-window">
-        <h2>Toutes les remises</h2>
-        <button id="close-global-remises">Close</button>
-
-        <table id="globalRemisesTable">
-            <thead>
-                <tr>
-                    <th>Entreprise</th>
-                    <th>SIRET</th>
-                    <th>Date</th>
-                    <th>Libellé</th>
-                    <th>Montant</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-
-        <div class="export-global-remises">
-            <button id="export-global-remises-csv" class="btn">CSV</button>
-            <button id="export-global-remises-xls" class="btn">XLS</button>
-            <button id="export-global-remises-pdf" class="btn">PDF</button>
+            <div class="export-global-remises">
+                <button id="export-global-remises-csv" class="btn">CSV</button>
+                <button id="export-global-remises-xls" class="btn">XLS</button>
+                <button id="export-global-remises-pdf" class="btn">PDF</button>
+            </div>
         </div>
     </div>
-</div>
 
-<!-- JS LAST -->
-<script src="js/dashboard2.js"></script>
+    <script>
+ <?php echo json_encode($transactions); ?>;
+    </script>
+    <script src="js/dashboard2.js"></script>
 
 </body>
 </html>
