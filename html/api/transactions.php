@@ -31,6 +31,7 @@ try{
             'intitule' => $r['intitule'] ?? '—',
             'siret' => $r['siret'] ?? '',
             'montant' => $montant,
+            'id_client' => isset($r['id_client']) ? (int)$r['id_client'] : null,
             // For compatibility we return empty arrays for impayes/remises. You can later
             // implement dedicated queries to fill these from your tables.
             'impayes' => [],
