@@ -1,0 +1,114 @@
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500&display=swap');
+
+body {
+  margin: 0;
+  font-family: 'Oswald', sans-serif;
+  background-color: #f0f0f0;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(to right, #b07ce8, #e0699f);
+  padding: 10px 30px;
+}
+
+header .logo img {
+  width: 50px;
+}
+
+header nav a {
+  color: white;
+  margin-left: 20px;
+  text-decoration: none;
+  font-size: 1.1em;
+}
+
+header nav a:hover {
+  text-decoration: underline;
+}
+
+main {
+  display: flex;
+  height: calc(100vh - 70px);
+}
+
+.image-section {
+  flex: 1;
+}
+
+.image-section img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.login-section {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #e8e8e8;
+}
+
+.login-box {
+  background-color: #d1d1d1;
+  padding: 40px;
+  border: 1px solid #999;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  text-align: center;
+  width: 60%;
+  border-radius: 4px;
+}
+
+.login-box h1 {
+  font-size: 2.5em;
+  margin-bottom: 30px;
+}
+
+.login-box label {
+  display: block;
+  text-align: left;
+  margin-top: 10px;
+  font-size: 1em;
+}
+
+.login-box input {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  border: none;
+  border-radius: 15px;
+  font-size: 1em;
+}
+
+.login-box .forgot {
+  display: block;
+  text-align: left;
+  margin-top: 5px;
+  font-size: 0.8em;
+  color: #2976d2;
+  text-decoration: none;
+}
+
+.login-box .forgot:hover {
+  text-decoration: underline;
+}
+
+.login-box button {
+  margin-top: 25px;
+  width: 70%;
+  padding: 10px;
+  border: none;
+  font-size: 1.2em;
+  color: white;
+  background: linear-gradient(to right, #b07ce8, #e0699f);
+  border-radius: 5px;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.login-box button:hover {
+  opacity: 0.9;
+}

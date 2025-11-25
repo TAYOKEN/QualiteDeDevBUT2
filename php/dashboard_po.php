@@ -2,32 +2,68 @@
 require_once 'connection.php';
 session_start();
 
-// Verif que seul les PO peuvent se login
-if (!isset($_SESSION['user'])) {
+/**
+ * ==========================
+ *  SÉCURITÉ / PROFIL PO
+ * ==========================
+ * login.php définit :
+ *  - $_SESSION['id_Utilisateur']
+ *  - $_SESSION['Profil'] : 'admin', 'client' ou 'product_owner'
+ *  - $_SESSION['user_nom']
+ */
+
+// Si non connecté → retour à la page de login
+if (!isset($_SESSION['id_Utilisateur'], $_SESSION['Profil'])) {
     header("Location: login.php");
     exit();
 }
 
-if ($_SESSION['user']['Profil'] !== 'product_owner') {
-    header("Location: unauthorized.php"); 
+// Seul le product_owner peut accéder à ce tableau de bord
+if ($_SESSION['Profil'] !== 'product_owner') {
+    header("Location: unauthorized.php");
     exit();
 }
 
+// Pour l'affichage dans la carte utilisateur
+$nomConnecte   = $_SESSION['user_nom'] ?? 'Utilisateur';
+$profilConnecte = $_SESSION['Profil']; // 'product_owner'
+
+// (Optionnel) texte lisible pour le profil
+switch ($profilConnecte) {
+    case 'admin':
+        $profilLabel = 'Administrateur';
+        break;
+    case 'client':
+        $profilLabel = 'Client';
+        break;
+    case 'product_owner':
+        $profilLabel = 'Product Owner';
+        break;
+    default:
+        $profilLabel = ucfirst($profilConnecte);
+}
+
+// ===========================
+//  REQUÊTES SQL TABLEAUX
+// ===========================
 $soldeGlobal  = 0;
 $totalImpaye  = 0.0;
 $transactions = [];
 
 try {
+    // Solde global
     $stmtSolde = $pdo->query("SELECT SUM(Solde) AS total_solde FROM Compte");
     $soldeGlobal = (float) $stmtSolde->fetchColumn();
-// Requete + calcul de somme pour avoir le total impayé
+
+    // Total impayé
     $stmtImpaye = $pdo->query("
         SELECT SUM(t.Montant_Total) AS total_impaye
         FROM Transactions t
         INNER JOIN Impaye i ON i.Id_Transactions = t.Id_Transactions
     ");
     $totalImpaye = (float) $stmtImpaye->fetchColumn();
-// Requete de recup
+
+    // Liste des transactions / impayés
     $stmt = $pdo->query("
         SELECT 
             t.Date_Transaction,
@@ -43,13 +79,15 @@ try {
         LEFT JOIN Impaye i  ON i.Id_Transactions = t.Id_Transactions
         ORDER BY t.Date_Transaction DESC
     ");
-    $transactions = $stmt->fetchAll();
+    $transactions = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 } catch (PDOException $e) {
     die("Erreur SQL : " . $e->getMessage());
 }
 
-
+// ===========================
+//  FONCTIONS UTILITAIRES
+// ===========================
 function formatMontant($m) {
     if ($m == 0 || $m === null) {
         return "0 $";
@@ -92,10 +130,9 @@ function formatDateFr($dateSql) {
             <img src="logo.png" alt="logo">
         </div>
         <nav>
-            <a href="#">Déconnecter</a>
-            <a href="#">à propos</a>
-
-            <!-- peut etre supprimer celui la -->
+            <!-- lien de déconnexion vers une page logout.php par exemple -->
+            <a href="logout.php">Déconnecter</a>
+            <a href="#">À propos</a>
             <div class="menu">☰</div>
         </nav>
     </header>
@@ -103,7 +140,10 @@ function formatDateFr($dateSql) {
     <main>
         <section class="infos">
             <div class="client-card">
-                <p><strong>Mr. Boukayouh Yanis</strong><br>PO</p>
+                <p>
+                    <strong><?php echo htmlspecialchars($nomConnecte); ?></strong><br>
+                    <?php echo htmlspecialchars($profilLabel); ?>
+                </p>
                 <p class="small">Portail de gestion de paiement - démonstration</p>
             </div>
 
@@ -129,7 +169,8 @@ function formatDateFr($dateSql) {
                     </div>
                 </div>
                 <canvas id="graphique" style="max-height:220px"></canvas>
-                <div style="margin-top:10px"><strong>Répartition (Camembert)</strong>
+                <div style="margin-top:10px">
+                    <strong>Répartition (Camembert)</strong>
                     <canvas id="pieChart" style="max-height:160px"></canvas>
                 </div>
             </div>
@@ -180,12 +221,13 @@ function formatDateFr($dateSql) {
                 </thead>
                 <tbody>
                     <?php foreach ($transactions as $row): 
-                        $date   = formatDateFr($row['Date_Transaction']);
-                        $nom    = $row['nom_client'];
-                        $siren  = $row['Siren'];
+                        $date          = formatDateFr($row['Date_Transaction']);
+                        $nom           = $row['nom_client'];
+                        $siren         = $row['Siren'];
                         $montantImpaye = (float) $row['montant_impaye'];
                         $classMontant  = $montantImpaye < 0 ? 'negatif' : 'positif';
 
+                        // TODO : remplacer par de vraies données impayés/remises si tu les ajoutes plus tard
                         $dataImpayes = '[]';
                         $dataRemises = '[]';
                     ?>
@@ -210,7 +252,7 @@ function formatDateFr($dateSql) {
                     </tr>
                 </tfoot>
             </table>
-                            <!-- Qui s'occupe d'avoir les requete pour voir tout les impayés ???? -->
+
             <div class="pager">
                 <div class="pagination" id="pagination"></div>
                 <div>
@@ -281,9 +323,9 @@ function formatDateFr($dateSql) {
     </div>
 
     <script>
- <?php echo json_encode($transactions); ?>;
+        // on met les données PHP dans une variable JS exploitable
+        const PHP_TRANSACTIONS = <?php echo json_encode($transactions, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>;
     </script>
     <script src="js/dashboard2.js"></script>
-
 </body>
 </html>

@@ -1,0 +1,94 @@
+[2025-11-25 18:01:13] ==== Nouvelle requête sur login.php ====
+[2025-11-25 18:01:15] ==== Nouvelle requête sur login.php ====
+[2025-11-25 18:01:15] Méthode POST détectée
+[2025-11-25 18:01:15] Identifiant reçu : 'testadm'
+[2025-11-25 18:01:15] Utilisateur trouvé en base : Id=21, Nom=testadm, Profil=1
+[2025-11-25 18:01:15] Résultat password_verify = OK
+[2025-11-25 18:01:15] Connexion OK, profil = 1
+[2025-11-25 18:01:15] Redirection vers dashboard_admin.php
+[2025-11-25 18:01:15] ==== Nouvelle requête sur login.php ====
+[2025-11-25 18:08:25] ==== Nouvelle requête sur login.php ====
+[2025-11-25 18:08:29] ==== Nouvelle requête sur login.php ====
+[2025-11-25 18:08:29] Méthode POST détectée
+[2025-11-25 18:08:29] Identifiant reçu : 'testadm'
+[2025-11-25 18:08:29] Utilisateur trouvé en base : Id=21, Nom=testadm, Profil=1
+[2025-11-25 18:08:29] Résultat password_verify = OK
+[2025-11-25 18:08:29] Connexion OK, profil = 1
+[2025-11-25 18:08:29] Redirection vers dashboard_admin.php
+[2025-11-25 18:08:29] ==== Nouvelle requête sur login.php ====
+[2025-11-25 18:09:31] ==== Nouvelle requête sur login.php ====
+[2025-11-25 18:09:34] ==== Nouvelle requête sur login.php ====
+[2025-11-25 18:09:34] Méthode POST détectée
+[2025-11-25 18:09:34] Identifiant reçu : 'testadm'
+[2025-11-25 18:09:34] Utilisateur trouvé : Id=21, Nom=testadm, Profil=1
+[2025-11-25 18:09:34] Résultat password_verify = OK
+[2025-11-25 18:09:34] Connexion OK, profil normalisé = admin
+[2025-11-25 18:09:34] Redirection vers dashboard_admin.php
+[2025-11-25 18:10:15] ==== Nouvelle requête sur login.php ====
+[2025-11-25 18:10:22] ==== Nouvelle requête sur login.php ====
+[2025-11-25 18:10:22] Méthode POST détectée
+[2025-11-25 18:10:22] Identifiant reçu : 'testown'
+[2025-11-25 18:10:22] Utilisateur trouvé : Id=22, Nom=testown, Profil=3
+[2025-11-25 18:10:22] Résultat password_verify = OK
+[2025-11-25 18:10:22] Connexion OK, profil normalisé = product_owner
+[2025-11-25 18:10:22] Redirection vers dashboard_admin.php
+[2025-11-25 18:10:22] ==== Nouvelle requête sur login.php ====
+[2025-11-25 18:18:41] ==== Nouvelle requête sur login.php ====
+[2025-11-25 18:18:41] Méthode POST détectée
+[2025-11-25 18:18:41] Identifiant reçu : 'testown'
+[2025-11-25 18:18:41] Utilisateur trouvé : Id=22, Nom=testown, Profil=3
+[2025-11-25 18:18:41] Résultat password_verify = OK
+[2025-11-25 18:18:41] Connexion OK, profil normalisé = product_owner
+[2025-11-25 18:18:41] Redirection vers dashboard_admin.php
+[2025-11-25 18:18:41] ==== Nouvelle requête sur login.php ====
+[2025-11-25 18:19:55] ==== Nouvelle requête sur login.php ====
+[2025-11-25 18:19:55] Méthode POST détectée
+[2025-11-25 18:19:55] Identifiant reçu : 'testown'
+[2025-11-25 18:19:55] Utilisateur trouvé : Id=22, Nom=testown, Profil=3
+[2025-11-25 18:19:55] Résultat password_verify = OK
+[2025-11-25 18:19:55] Connexion OK, profil normalisé = product_owner
+[2025-11-25 18:19:55] Profil non géré après normalisation : product_owner
+[2025-11-25 18:20:02] ==== Nouvelle requête sur login.php ====
+[2025-11-25 18:20:02] Init tentatives = 0
+[2025-11-25 18:20:02] Méthode POST détectée
+[2025-11-25 18:20:02] Identifiant reçu : 'testown'
+[2025-11-25 18:20:02] Utilisateur trouvé : Id=22, Nom=testown, Profil=3
+[2025-11-25 18:20:02] Résultat password_verify = OK
+[2025-11-25 18:20:02] Connexion OK, profil normalisé = product_owner
+[2025-11-25 18:20:02] Profil non géré après normalisation : product_owner
+[2025-11-25 18:20:19] ==== Nouvelle requête sur login.php ====
+[2025-11-25 18:20:19] Init tentatives = 0
+[2025-11-25 18:20:19] Méthode POST détectée
+[2025-11-25 18:20:19] Identifiant reçu : 'testown'
+[2025-11-25 18:20:19] Utilisateur trouvé : Id=22, Nom=testown, Profil=3
+[2025-11-25 18:20:19] Résultat password_verify = OK
+[2025-11-25 18:20:19] Connexion OK, profil normalisé = product_owner
+[2025-11-25 18:20:19] Profil non géré après normalisation : product_owner
+[2025-11-25 18:21:06] ==== Nouvelle requête sur login.php ====
+[2025-11-25 18:21:06] Init tentatives = 0
+[2025-11-25 18:21:06] Méthode POST détectée
+[2025-11-25 18:21:06] Identifiant reçu : 'testown'
+[2025-11-25 18:21:06] Utilisateur trouvé : Id=22, Nom=testown, Profil=3
+[2025-11-25 18:21:06] Résultat password_verify = OK
+[2025-11-25 18:21:06] Connexion OK, profil normalisé = product_owner
+[2025-11-25 18:21:06] Redirection vers dashboard_po.php
+[2025-11-25 18:36:32] ==== Nouvelle requête sur login.php ====
+[2025-11-25 18:36:32] Init tentatives = 0
+[2025-11-25 18:36:36] ==== Nouvelle requête sur login.php ====
+[2025-11-25 18:36:36] Méthode POST détectée
+[2025-11-25 18:36:36] Identifiant reçu : 'testadm'
+[2025-11-25 18:36:36] Utilisateur trouvé : Id=21, Nom=testadm, Profil=1
+[2025-11-25 18:36:36] Résultat password_verify = OK
+[2025-11-25 18:36:36] Connexion OK, profil normalisé = admin
+[2025-11-25 18:36:36] Redirection vers dashboard_admin.php
+[2025-11-25 18:36:58] ==== Nouvelle requête sur login.php ====
+[2025-11-25 18:36:58] Init tentatives = 0
+[2025-11-25 18:37:05] ==== Nouvelle requête sur login.php ====
+[2025-11-25 18:37:05] Méthode POST détectée
+[2025-11-25 18:37:05] Identifiant reçu : 'testcli'
+[2025-11-25 18:37:05] Utilisateur trouvé : Id=23, Nom=testcli, Profil=2
+[2025-11-25 18:37:05] Résultat password_verify = OK
+[2025-11-25 18:37:05] Connexion OK, profil normalisé = client
+[2025-11-25 18:37:05] Redirection vers dashboard.php
+[2025-11-25 18:41:36] ==== Nouvelle requête sur login.php ====
+[2025-11-25 18:41:36] Init tentatives = 0

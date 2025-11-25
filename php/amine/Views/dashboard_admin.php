@@ -122,18 +122,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     // Redirection cohérente avec le 2e code :
                     // - admin / product_owner → dashboard_admin.php
                     // - client                → dashboard.php
-                    if ($profilString === 'admin') {
+                    if ($profilString === 'admin' || $profilString === 'product_owner') {
                         log_login("Redirection vers dashboard_admin.php");
                         header("Location: dashboard_admin.php");
                         exit;
                     } elseif ($profilString === 'client') {
                         log_login("Redirection vers dashboard.php");
                         header("Location: dashboard.php");
-                        exit;
-                    }
-                    elseif ($profilString === 'product_owner') {
-                        log_login("Redirection vers dashboard_po.php");
-                        header("Location: dashboard_po.php");
                         exit;
                     } else {
                         // Sécurité (au cas où un autre profil apparaisse)
