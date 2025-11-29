@@ -92,3 +92,25 @@
 [2025-11-25 18:37:05] Redirection vers dashboard.php
 [2025-11-25 18:41:36] ==== Nouvelle requête sur login.php ====
 [2025-11-25 18:41:36] Init tentatives = 0
+[2025-11-29 19:57:34] ==== Nouvelle requête sur login.php ====
+[2025-11-29 19:57:34] Init tentatives = 0
+[2025-11-29 19:57:43] ==== Nouvelle requête sur login.php ====
+[2025-11-29 19:57:43] Méthode POST détectée
+[2025-11-29 19:57:43] Identifiant reçu : 'testpo'
+[2025-11-29 19:57:43] Aucun utilisateur trouvé pour ce nom.
+[2025-11-29 19:57:43] Aucun utilisateur, tentatives = 1
+[2025-11-29 19:57:47] ==== Nouvelle requête sur login.php ====
+[2025-11-29 19:57:47] Méthode POST détectée
+[2025-11-29 19:57:47] Identifiant reçu : 'testadm'
+[2025-11-29 19:57:47] Utilisateur trouvé : Id=21, Nom=testadm, Profil=1
+[2025-11-29 19:57:47] Résultat password_verify = OK
+[2025-11-29 19:57:47] Connexion OK, profil normalisé = admin
+[2025-11-29 19:57:47] Redirection vers dashboard_admin.php
+[2025-11-29 19:57:54] ==== Nouvelle requête sur login.php ====
+[2025-11-29 19:58:00] ==== Nouvelle requête sur login.php ====
+[2025-11-29 19:58:00] Méthode POST détectée
+[2025-11-29 19:58:00] Identifiant reçu : 'testown'
+[2025-11-29 19:58:00] Utilisateur trouvé : Id=22, Nom=testown, Profil=3
+[2025-11-29 19:58:00] Résultat password_verify = OK
+[2025-11-29 19:58:00] Connexion OK, profil normalisé = product_owner
+[2025-11-29 19:58:00] Redirection vers dashboard_po.php
