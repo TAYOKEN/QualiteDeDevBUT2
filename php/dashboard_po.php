@@ -1,5 +1,4 @@
 <?php
-// Assurez-vous que connection.php définit la variable $pdo
 require_once 'connection.php';
 session_start();
 
@@ -9,7 +8,6 @@ session_start();
 class RemiseModel {
     private $pdo;
 
-    // Le constructeur prend l'objet PDO comme argument
     public function __construct(PDO $pdo) {
         $this->pdo = $pdo;
     }
@@ -68,15 +66,41 @@ class RemiseModel {
         return $row['solde_global'] ?? 0;
     }
 
+    /**
+     * Nouvelle fonction pour le solde global de tous les clients (pour le Product Owner)
+     */
+    public function getGlobalSoldeAllClients() {
+        $sql = "SELECT
+                SUM(CASE
+                        WHEN t.Sens = '+' THEN t.Montant
+                        WHEN t.Sens = '-' THEN -t.Montant
+                        ELSE 0
+                    END) AS solde_global
+                FROM Transactions t";
+        $stmt = $this->pdo->query($sql);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row['solde_global'] ?? 0;
+    }
+
+    /**
+     * Mise à jour pour inclure toutes les colonnes nécessaires pour le tableau, la recherche et les data-attributes.
+     */
     public function getAllTransactionsWithStatus() {
         $sql = "
             SELECT
             t.Id_Transactions,
             t.Date_Transaction,
+            t.Sens,               -- Ajouté: Sens de la transaction
             t.Montant,
+            t.Libelle,            -- Ajouté: Libellé de la transaction
+            t.Num_Carte,
+            t.Id_Remise,          -- Ajouté: Id_Remise pour relier les transactions
+            r.Id_Client,          -- Ajouté: Id_Client pour 'Accéder'
             u.Nom AS Nom_Utilisateur,
             c.Siren AS Siret_Client,
-            CASE 
+            i.Num_dossier,        -- Ajouté: Détails de l'Impayé
+            i.Libelle_impaye,     -- Ajouté: Détails de l'Impayé
+            CASE
                 WHEN i.Id_Impaye IS NOT NULL THEN 1
                 ELSE 0
             END AS estImpaye
@@ -92,13 +116,10 @@ class RemiseModel {
     }
 } 
 
-/**
- * Classe Model pour les opérations liées aux Profils/Clients.
- */
+// ... (ProfilModel et UtilisateurModel restent inchangées)
 class ProfilModel {
     private $pdo;
 
-    // Le constructeur prend l'objet PDO comme argument
     public function __construct(PDO $pdo) {
         $this->pdo = $pdo;
     }
@@ -112,19 +133,13 @@ class ProfilModel {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 } 
-
-/**
- * Classe Model pour les opérations liées aux Utilisateurs.
- */
 class UtilisateurModel {
     private $pdo;
 
-    // Le constructeur prend l'objet PDO comme argument
     public function __construct(PDO $pdo) {
         $this->pdo = $pdo;
     }
 
-    // récupère l'utilisateur par son nom
     public function getUserByUsername($nom) {
         $sql = "SELECT id_Utilisateur, Mot_de_passe, Profil FROM Utilisateur WHERE Nom = :nom";
         $stmt = $this->pdo->prepare($sql);
@@ -133,7 +148,6 @@ class UtilisateurModel {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    // récupère l'utilisateur par son id
     public function getUsernameById($id_user) {
         $sql = "SELECT * FROM Utilisateur WHERE id_Utilisateur = :id_user";
         $stmt = $this->pdo->prepare($sql);
@@ -142,7 +156,6 @@ class UtilisateurModel {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    // ajoute un nouvel utilisateur
     public function addUser($nom, $mdp, $profil) {
         $mdp_secure = password_hash($mdp, PASSWORD_DEFAULT);
         $sql = "INSERT INTO Utilisateur (Nom, Mot_de_passe, Profil) VALUES (:nom, :mdp, :profil)";
@@ -151,15 +164,13 @@ class UtilisateurModel {
             $stmt->execute([':nom' => $nom, ':mdp' => $mdp_secure, ':profil' => $profil]);
             return true;
         } catch (PDOException $e) {
-            // Code 23000 pour erreur d'intégrité (duplication)
             if ($e->getCode() == 23000) {
                 return "duplicate";
             }
-            throw $e; // Renvoyer les autres exceptions
+            throw $e;
         }
     }
 
-    // met à jour le mot de passe d'un utilisateur
     public function setPassword($id_user, $password) {
         $hashed = password_hash($password, PASSWORD_DEFAULT);
         $sql = "UPDATE Utilisateur SET Mot_de_passe = :password WHERE Id_Utilisateur = :id_user";
@@ -167,7 +178,6 @@ class UtilisateurModel {
         return $stmt->execute([':password' => $hashed, ':id_user' => $id_user]);
     }
 
-    // recupere tout les utilisateur (sans le mot de passe) et sans le compte admin
     public function getAllUser($id_user) {
         $sql = "SELECT id_Utilisateur, Nom, Profil FROM Utilisateur WHERE id_Utilisateur != :id_user";
         $stmt = $this->pdo->prepare($sql);
@@ -177,21 +187,17 @@ class UtilisateurModel {
     }
 } 
 
-/**
- * Classe Controller pour les opérations liées aux Remises.
- */
+// ... (RemiseController reste inchangée, elle n'est pas utilisée ici pour le PO dashboard)
 class RemiseController {
     private $model;
     private $profilModel;
 
-    // Le constructeur prend l'objet PDO comme argument
     public function __construct(PDO $pdo) {
         $this->model = new RemiseModel($pdo);
         $this->profilModel = new ProfilModel($pdo);
     }
 
     public function getRemisesStructure() {
-        // ... (Le reste de la logique de cette méthode est correcte)
         if (!isset($_SESSION["id_Utilisateur"])) {
             return [];
         }
@@ -247,7 +253,6 @@ class RemiseController {
         return $result;
     }
 
-    // Nouvelle fonction pour récupérer le solde global
     public function getSoldeGlobalClient() {
         if (!isset($_SESSION["id_Utilisateur"])) {
             return 0;
@@ -270,10 +275,11 @@ if (!isset($_SESSION["Profil"]) || $_SESSION["Profil"] != "product_owner") {
     exit;
 }
 
-// Initialisation du modèle Remise en passant l'objet PDO
-// $pdo est supposé être disponible via require_once 'connection.php';
+// Initialisation des données pour le Product Owner
 $model = new RemiseModel($pdo);
 $transactions = $model->getAllTransactionsWithStatus();
+$global_solde = $model->getGlobalSoldeAllClients(); // Récupère le solde global pour la carte Solde Global
+$transactions_json = json_encode($transactions); // Expose toutes les transactions au JS pour les graphiques et "Voir Plus"
 ?>
 
 <!DOCTYPE html>
@@ -297,10 +303,8 @@ $transactions = $model->getAllTransactionsWithStatus();
             <img src="logo.png" alt="logo">
         </div>
         <nav>
-            <a href="/QualiteDeDevBUT2/Controllers/user_controller.php?action=logout">Déconnecter</a>
-            <a href="#">à propos</a>
-            <div class="menu">☰</div>
-            <a href="register.php">Ajouter un utilisateur</a>
+            <a href="logout.php">Déconnecter</a>
+            <a href="user_gestion.php">Gerer Users</a>
         </nav>
     </header>
 
@@ -313,7 +317,7 @@ $transactions = $model->getAllTransactionsWithStatus();
 
             <div class="solde-card">
                 <p>Solde Global :</p>
-                <h1 id="solde-global" class="solde"></h1>
+                <h1 id="solde-global" class="solde"><?php echo number_format($global_solde, 2, ',', ' ') . ' $'; ?></h1>
                 <p class="small" id="total-neg-display"></p>
             </div>
 
@@ -329,7 +333,7 @@ $transactions = $model->getAllTransactionsWithStatus();
                     </div>
                 </div>
                 <canvas id="graphique" style="max-height:220px"></canvas>
-                <div style="margin-top:10px"><strong>Répartition (Camembert)</strong>
+                <div style="margin-top:10px"><strong>Répartition des Impayés (Camembert)</strong>
                     <canvas id="pieChart" style="max-height:160px"></canvas>
                 </div>
             </div>
@@ -382,22 +386,25 @@ $transactions = $model->getAllTransactionsWithStatus();
                         <?php
                         if (!empty($transactions)):
                             foreach ($transactions as $t):
-                                // Détermine la classe en fonction du statut (positif/négatif)
-                                $classe = $t['estImpaye'] ? 'negatif' : 'positif';
-                                // Le montant affiché est le Montant de la transaction si impayé, ou 0.00 $ sinon
-                                // Note: La logique initiale qui affichait 0.00 $ si ce n'est pas impayé semble étrange pour une transaction.
-                                // Si c'est pour un tableau de transactions globales, vous voudrez peut-être afficher le Montant
-                                // de la transaction. J'ai conservé la logique initiale d'affichage conditionnel.
-                                $montant_display = $t['estImpaye'] ? number_format($t['Montant'] ?? 0, 2) . ' $' : number_format(0, 2) . ' $';
-                                // Les données data-impayes et data-remises sont codées pour JavaScript
+                                // Calcul du montant signé et affichage
+                                $montant_val = ($t['Sens'] == '-') ? -$t['Montant'] : $t['Montant'];
+                                $classe = $t['Sens'] == '-' ? 'negatif' : 'positif';
+                                $montant_display = number_format($montant_val, 2, ',', ' ') . ' $';
+                                
+                                // Préparation des données complètes de la transaction (inclut les champs Impaye si c'en est un)
+                                // pour que le JS puisse extraire les détails pour le camembert et la sidebar.
                                 $data_impayes = $t['estImpaye'] ? json_encode([$t]) : json_encode([]);
-                                // L'ID Remise n'est pas récupéré dans getAllTransactionsWithStatus, donc la structure est limitée ici.
-                                // Si vous voulez les remises, vous devez adapter getAllTransactionsWithStatus ou les récupérer séparément.
-                                // Pour l'instant, je laisse un tableau vide pour data-remises comme dans votre code initial.
+                                
+                                // data-remises reste vide, car le JS va simuler le fetch sur ALL_TRANSACTIONS
                         ?>
                         <tr class="data-row" 
                             data-impayes='<?= htmlspecialchars($data_impayes, ENT_QUOTES, 'UTF-8') ?>' 
-                            data-remises='<?= htmlspecialchars(json_encode([]), ENT_QUOTES, 'UTF-8') ?>'>
+                            data-remises='<?= htmlspecialchars(json_encode([]), ENT_QUOTES, 'UTF-8') ?>'
+                            data-id-client="<?= htmlspecialchars($t['Id_Client'] ?? '') ?>"
+                            data-id-remise="<?= htmlspecialchars($t['Id_Remise'] ?? '') ?>"
+                            data-transaction-libelle="<?= htmlspecialchars($t['Libelle'] ?? '') ?>"
+                            data-montant-val="<?= htmlspecialchars($montant_val) ?>"
+                            >
                             <td><?= date('d/m/Y', strtotime($t['Date_Transaction'])) ?></td>
                             <td><?= htmlspecialchars($t['Nom_Utilisateur'] ?? 'N/A') ?></td>
                             <td><?= htmlspecialchars($t['Siret_Client'] ?? 'N/A') ?></td>
@@ -440,16 +447,23 @@ $transactions = $model->getAllTransactionsWithStatus();
                 <div style="margin-left:auto"><span class="small" id="sidebarTotals"></span></div>
             </div>
 
-            <h4>Impayés</h4>
-            <table id="impayesTable"><thead><tr><th>Date</th><th>Date limite</th><th>Libellé</th><th>Montant</th></tr></thead><tbody></tbody></table>
+            <h4>Impayés (Transaction Courante)</h4>
+            <table id="impayesTable"><thead><tr><th>Date</th><th>N° Dossier</th><th>Libellé Impayé</th><th>Montant</th></tr></thead><tbody></tbody></table>
 
-            <h4 style="margin-top:12px">Rémises</h4>
-            <table id="remisesTable"><thead><tr><th>Date</th><th>Date limite</th><th>Libellé</th><th>Montant</th></tr></thead><tbody></tbody></table>
+            <h4 style="margin-top:12px">Transactions de la Remise Associée</h4>
+            <table id="remisesTable"><thead><tr><th>Date</th><th>Sens</th><th>Libellé</th><th>Montant</th></tr></thead><tbody></tbody></table>
         </aside>
     </div>
 
+    <script>
+        const ALL_TRANSACTIONS = <?= $transactions_json ?>;
+        // On rend le solde global disponible pour la classe .negatif côté client
+        const soldeGlobalEl = document.getElementById('solde-global');
+        if (parseFloat('<?= $global_solde ?>') < 0) {
+            soldeGlobalEl.classList.add('negatif');
+        }
+    </script>
+    
     <script src="js/dashboard2.js"></script> 
-
-
 </body>
 </html>

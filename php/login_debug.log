@@ -114,3 +114,35 @@
 [2025-11-29 19:58:00] Résultat password_verify = OK
 [2025-11-29 19:58:00] Connexion OK, profil normalisé = product_owner
 [2025-11-29 19:58:00] Redirection vers dashboard_po.php
+[2025-12-03 18:47:24] ==== Nouvelle requête sur login.php ====
+[2025-12-03 18:47:24] Init tentatives = 0
+[2025-12-03 18:47:37] ==== Nouvelle requête sur login.php ====
+[2025-12-03 18:47:37] Méthode POST détectée
+[2025-12-03 18:47:37] Identifiant reçu : 'testown'
+[2025-12-03 18:47:37] Utilisateur trouvé : Id=22, Nom=testown, Profil=3
+[2025-12-03 18:47:37] Résultat password_verify = OK
+[2025-12-03 18:47:37] Connexion OK, profil normalisé = product_owner
+[2025-12-03 18:47:37] Redirection vers dashboard_po.php
+[2025-12-03 20:29:38] ==== Nouvelle requête sur login.php ====
+[2025-12-03 20:29:41] ==== Nouvelle requête sur login.php ====
+[2025-12-03 20:29:41] Méthode POST détectée
+[2025-12-03 20:29:41] Identifiant reçu : 'testadm'
+[2025-12-03 20:29:41] Aucun utilisateur trouvé pour ce nom.
+[2025-12-03 20:29:41] Aucun utilisateur, tentatives = 1
+[2025-12-03 20:31:01] ==== Nouvelle requête sur login.php ====
+[2025-12-03 20:31:05] ==== Nouvelle requête sur login.php ====
+[2025-12-03 20:31:05] Méthode POST détectée
+[2025-12-03 20:31:05] Identifiant reçu : 'testadm'
+[2025-12-03 20:31:05] Utilisateur trouvé : Id=7, Nom=testadm, Profil=1
+[2025-12-03 20:31:05] Résultat password_verify = OK
+[2025-12-03 20:31:05] Connexion OK, profil normalisé = admin
+[2025-12-03 20:31:05] Redirection vers dashboard_admin.php
+[2025-12-03 20:39:08] ==== Nouvelle requête sur login.php ====
+[2025-12-03 20:39:08] Init tentatives = 0
+[2025-12-03 20:39:16] ==== Nouvelle requête sur login.php ====
+[2025-12-03 20:39:16] Méthode POST détectée
+[2025-12-03 20:39:16] Identifiant reçu : 'testpo'
+[2025-12-03 20:39:16] Utilisateur trouvé : Id=9, Nom=testpo, Profil=3
+[2025-12-03 20:39:16] Résultat password_verify = OK
+[2025-12-03 20:39:16] Connexion OK, profil normalisé = product_owner
+[2025-12-03 20:39:16] Redirection vers dashboard_po.php
